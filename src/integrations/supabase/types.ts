@@ -398,6 +398,220 @@ export type Database = {
           },
         ]
       }
+      sale_deliveries: {
+        Row: {
+          address: string
+          city: string | null
+          created_at: string | null
+          delivery_date: string | null
+          id: string
+          notes: string | null
+          sale_id: string
+          scheduled_date: string
+          state: string | null
+          status: string
+          updated_at: string | null
+          zipcode: string | null
+        }
+        Insert: {
+          address: string
+          city?: string | null
+          created_at?: string | null
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          sale_id: string
+          scheduled_date: string
+          state?: string | null
+          status?: string
+          updated_at?: string | null
+          zipcode?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string | null
+          created_at?: string | null
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          sale_id?: string
+          scheduled_date?: string
+          state?: string | null
+          status?: string
+          updated_at?: string | null
+          zipcode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_deliveries_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_items: {
+        Row: {
+          created_at: string | null
+          discount: number | null
+          id: string
+          product_id: string
+          product_name: string
+          product_sku: string
+          quantity: number
+          sale_id: string
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          discount?: number | null
+          id?: string
+          product_id: string
+          product_name: string
+          product_sku: string
+          quantity: number
+          sale_id: string
+          total: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          discount?: number | null
+          id?: string
+          product_id?: string
+          product_name?: string
+          product_sku?: string
+          quantity?: number
+          sale_id?: string
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          sale_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          notes?: string | null
+          payment_date: string
+          payment_method: string
+          sale_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          sale_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_payments_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          customer_document: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          delivery_status: string
+          discount: number | null
+          id: string
+          notes: string | null
+          payment_status: string
+          sale_date: string
+          sale_number: string
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_document?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          delivery_status?: string
+          discount?: number | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          sale_date?: string
+          sale_number: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_document?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_status?: string
+          discount?: number | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          sale_date?: string
+          sale_number?: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           created_at: string | null
@@ -520,7 +734,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_sale_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

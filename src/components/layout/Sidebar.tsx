@@ -50,11 +50,6 @@ const menuItems = [
     icon: ShoppingCart,
     label: "Vendas",
     path: "/vendas",
-    submenu: [
-      { label: "Pedidos", path: "/vendas/pedidos" },
-      { label: "Orçamentos", path: "/vendas/orcamentos" },
-      { label: "PDV", path: "/vendas/pdv" },
-    ],
   },
   {
     icon: ClipboardList,
