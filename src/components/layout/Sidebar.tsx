@@ -44,7 +44,6 @@ const menuItems = [
     submenu: [
       { label: "Catálogo", path: "/produtos/catalogo" },
       { label: "Categorias", path: "/produtos/categorias" },
-      { label: "Variações", path: "/produtos/variacoes" },
     ],
   },
   {
