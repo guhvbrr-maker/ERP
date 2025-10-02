@@ -10,7 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-export const Dashboard = () => {
+const Dashboard = () => {
   const kpis = [
     {
       title: "Vendas do Mês",
@@ -205,3 +205,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;
