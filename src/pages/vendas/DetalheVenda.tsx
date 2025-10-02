@@ -1,11 +1,13 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { ArrowLeft, Printer, Edit, Loader2 } from "lucide-react";
+import { ImpressaoVenda } from "@/components/vendas/ImpressaoVenda";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Printer, Edit, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -84,14 +86,14 @@ const DetalheVenda = () => {
     },
   });
 
-  const { data: deliveries = [] } = useQuery({
-    queryKey: ["sale_deliveries", id],
+  const { data: delivery } = useQuery({
+    queryKey: ["sale_delivery", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sale_deliveries")
         .select("*")
         .eq("sale_id", id)
-        .order("scheduled_date");
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -131,7 +133,14 @@ const DetalheVenda = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <ImpressaoVenda 
+        sale={sale}
+        items={items || []}
+        payments={payments || []}
+        delivery={delivery}
+      />
+      
+      <div className="flex items-center justify-between print:hidden">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/vendas")}>
             <ArrowLeft className="h-5 w-5" />
@@ -151,7 +160,7 @@ const DetalheVenda = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 print:hidden">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Status da Venda</CardTitle>
@@ -224,7 +233,7 @@ const DetalheVenda = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="geral">
+      <Tabs defaultValue="geral" className="print:hidden">
         <TabsList>
           <TabsTrigger value="geral">Geral</TabsTrigger>
           <TabsTrigger value="pagamentos">Pagamentos</TabsTrigger>
@@ -415,53 +424,49 @@ const DetalheVenda = () => {
               <CardTitle>Entregas</CardTitle>
             </CardHeader>
             <CardContent>
-              {deliveries.length === 0 ? (
+              {!delivery ? (
                 <div className="text-center py-8 text-muted-foreground">
                   Nenhuma entrega agendada
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {deliveries.map((delivery) => (
-                    <div key={delivery.id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <div className="font-medium">
-                            Data Agendada:{" "}
-                            {new Date(delivery.scheduled_date).toLocaleDateString("pt-BR")}
-                          </div>
-                          {delivery.delivery_date && (
-                            <div className="text-sm text-muted-foreground">
-                              Entregue em:{" "}
-                              {new Date(delivery.delivery_date).toLocaleDateString("pt-BR")}
-                            </div>
-                          )}
+                <div className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-medium">
+                        Data Agendada:{" "}
+                        {new Date(delivery.scheduled_date).toLocaleDateString("pt-BR")}
+                      </div>
+                      {delivery.delivery_date && (
+                        <div className="text-sm text-muted-foreground">
+                          Entregue em:{" "}
+                          {new Date(delivery.delivery_date).toLocaleDateString("pt-BR")}
                         </div>
-                        <Badge
-                          variant={delivery.status === "delivered" ? "default" : "outline"}
-                        >
-                          {delivery.status === "delivered"
-                            ? "Entregue"
-                            : delivery.status === "in_transit"
-                            ? "Em trânsito"
-                            : delivery.status === "scheduled"
-                            ? "Agendada"
-                            : "Pendente"}
-                        </Badge>
-                      </div>
-                      <div className="text-sm space-y-1">
-                        <div>{delivery.address}</div>
-                        {delivery.city && delivery.state && (
-                          <div>
-                            {delivery.city} - {delivery.state}
-                            {delivery.zipcode && ` - CEP: ${delivery.zipcode}`}
-                          </div>
-                        )}
-                        {delivery.notes && (
-                          <div className="text-muted-foreground mt-2">{delivery.notes}</div>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  ))}
+                    <Badge
+                      variant={delivery.status === "delivered" ? "default" : "outline"}
+                    >
+                      {delivery.status === "delivered"
+                        ? "Entregue"
+                        : delivery.status === "in_transit"
+                        ? "Em trânsito"
+                        : delivery.status === "scheduled"
+                        ? "Agendada"
+                        : "Pendente"}
+                    </Badge>
+                  </div>
+                  <div className="text-sm space-y-1">
+                    <div>{delivery.address}</div>
+                    {delivery.city && delivery.state && (
+                      <div>
+                        {delivery.city} - {delivery.state}
+                        {delivery.zipcode && ` - CEP: ${delivery.zipcode}`}
+                      </div>
+                    )}
+                    {delivery.notes && (
+                      <div className="text-muted-foreground mt-2">{delivery.notes}</div>
+                    )}
+                  </div>
                 </div>
               )}
             </CardContent>

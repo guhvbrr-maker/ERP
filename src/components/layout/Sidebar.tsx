@@ -65,22 +65,11 @@ const menuItems = [
     icon: Warehouse,
     label: "Estoque",
     path: "/estoque",
-    submenu: [
-      { label: "Posição", path: "/estoque/posicao" },
-      { label: "Transferências", path: "/estoque/transferencias" },
-      { label: "Inventário", path: "/estoque/inventario" },
-      { label: "Reservas", path: "/estoque/reservas" },
-    ],
   },
   {
     icon: Truck,
     label: "Entregas",
     path: "/entregas",
-    submenu: [
-      { label: "Agenda", path: "/entregas/agenda" },
-      { label: "Rotas", path: "/entregas/rotas" },
-      { label: "Montagens", path: "/entregas/montagens" },
-    ],
   },
   {
     icon: Wrench,
@@ -97,11 +86,7 @@ const menuItems = [
     label: "Financeiro",
     path: "/financeiro",
     submenu: [
-      { label: "Contas a Receber", path: "/financeiro/receber" },
-      { label: "Contas a Pagar", path: "/financeiro/pagar" },
-      { label: "Fluxo de Caixa", path: "/financeiro/fluxo" },
-      { label: "DRE", path: "/financeiro/dre" },
-      { label: "Comissões", path: "/financeiro/comissoes" },
+      { label: "Contas a Receber", path: "/financeiro/contas-receber" },
     ],
   },
   {

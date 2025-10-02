@@ -12,6 +12,9 @@ import Configuracoes from "./pages/Configuracoes";
 import Vendas from "./pages/vendas/Vendas";
 import NovaVenda from "./pages/vendas/NovaVenda";
 import DetalheVenda from "./pages/vendas/DetalheVenda";
+import Estoque from "./pages/estoque/Estoque";
+import ContasReceber from "./pages/financeiro/ContasReceber";
+import Entregas from "./pages/entregas/Entregas";
 import MainLayout from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
@@ -31,7 +34,9 @@ const App = () => (
           <Route path="/vendas" element={<MainLayout><Vendas /></MainLayout>} />
           <Route path="/vendas/nova" element={<MainLayout><NovaVenda /></MainLayout>} />
           <Route path="/vendas/:id" element={<MainLayout><DetalheVenda /></MainLayout>} />
-          <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
+          <Route path="/estoque" element={<MainLayout><Estoque /></MainLayout>} />
+          <Route path="/financeiro/contas-receber" element={<MainLayout><ContasReceber /></MainLayout>} />
+          <Route path="/entregas" element={<MainLayout><Entregas /></MainLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
