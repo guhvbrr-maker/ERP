@@ -134,12 +134,6 @@ const menuItems = [
     icon: Settings,
     label: "Configurações",
     path: "/configuracoes",
-    submenu: [
-      { label: "Empresa", path: "/configuracoes/empresa" },
-      { label: "Usuários", path: "/configuracoes/usuarios" },
-      { label: "Depósitos", path: "/configuracoes/depositos" },
-      { label: "Integrações", path: "/configuracoes/integracoes" },
-    ],
   },
 ];
 

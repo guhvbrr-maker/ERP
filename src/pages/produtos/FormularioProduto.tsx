@@ -167,6 +167,33 @@ export default function FormularioProduto() {
     },
   });
 
+  // Carregar configurações de SKU automático
+  const { data: skuSettings } = useQuery({
+    queryKey: ["settings", "sku_auto_generate"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("*")
+        .eq("key", "sku_auto_generate")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !isEditing, // Só carrega se for novo produto
+  });
+
+  // Gerar SKU automático para novos produtos
+  useEffect(() => {
+    if (!isEditing && skuSettings?.value) {
+      const settings = skuSettings.value as any;
+      if (settings.enabled && !form.getValues("sku")) {
+        const nextNumber = settings.current_number || 1;
+        const sku = `${settings.prefix}${nextNumber.toString().padStart(6, "0")}`;
+        form.setValue("sku", sku);
+      }
+    }
+  }, [skuSettings, isEditing, form]);
+
   useEffect(() => {
     if (product && isEditing) {
       form.reset({
@@ -227,10 +254,26 @@ export default function FormularioProduto() {
       } else {
         const { error } = await supabase.from("products").insert([productData]);
         if (error) throw error;
+        
+        // Incrementar contador de SKU se estiver usando geração automática
+        if (skuSettings?.value) {
+          const settings = skuSettings.value as any;
+          if (settings.enabled) {
+            const newSettings = {
+              ...settings,
+              current_number: (settings.current_number || 1) + 1,
+            };
+            await supabase
+              .from("settings")
+              .update({ value: newSettings as any })
+              .eq("key", "sku_auto_generate");
+          }
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
       toast.success(isEditing ? "Produto atualizado!" : "Produto criado!");
       navigate("/produtos/catalogo");
     },
@@ -349,8 +392,17 @@ export default function FormularioProduto() {
                       <FormItem>
                         <FormLabel>SKU *</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Ex: SOF-001" />
+                          <Input 
+                            {...field} 
+                            placeholder="Ex: SOF-001"
+                            readOnly={!isEditing && skuSettings?.value && (skuSettings.value as any).enabled}
+                          />
                         </FormControl>
+                        {!isEditing && skuSettings?.value && (skuSettings.value as any).enabled && (
+                          <FormDescription className="text-xs text-muted-foreground">
+                            SKU gerado automaticamente
+                          </FormDescription>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
