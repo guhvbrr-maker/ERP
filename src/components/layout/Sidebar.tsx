@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -145,6 +146,25 @@ const menuItems = [
 
 export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const location = useLocation();
+  const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+
+  const toggleExpanded = (path: string) => {
+    setExpandedItems(prev => 
+      prev.includes(path) 
+        ? prev.filter(p => p !== path)
+        : [...prev, path]
+    );
+  };
+
+  // Auto-expand o item ativo ao carregar
+  React.useEffect(() => {
+    const activeItem = menuItems.find(item => 
+      location.pathname === item.path || location.pathname.startsWith(item.path + "/")
+    );
+    if (activeItem && !expandedItems.includes(activeItem.path)) {
+      setExpandedItems(prev => [...prev, activeItem.path]);
+    }
+  }, [location.pathname]);
 
   return (
     <>
@@ -171,23 +191,51 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
+              const isExpanded = expandedItems.includes(item.path);
+              const hasSubmenu = item.submenu && item.submenu.length > 0;
 
               return (
                 <div key={item.path}>
-                  <Link
-                    to={item.path}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-fast",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-soft"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                    )}
-                  >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </Link>
+                  {hasSubmenu ? (
+                    <button
+                      onClick={() => toggleExpanded(item.path)}
+                      className={cn(
+                        "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-fast",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-soft"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                      )}
+                    >
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      <svg
+                        className={cn(
+                          "h-4 w-4 transition-transform duration-fast",
+                          isExpanded ? "rotate-180" : ""
+                        )}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-fast",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-soft"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                      )}
+                    >
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      <span>{item.label}</span>
+                    </Link>
+                  )}
 
-                  {item.submenu && isActive && (
+                  {item.submenu && isExpanded && (
                     <div className="ml-8 mt-1 space-y-1">
                       {item.submenu.map((subitem) => (
                         <Link
