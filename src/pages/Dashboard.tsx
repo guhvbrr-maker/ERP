@@ -26,14 +26,14 @@ const Dashboard = () => {
 
       const { data, error } = await supabase
         .from("sales")
-        .select("total_amount")
+        .select("total")
         .gte("sale_date", startDate)
         .lte("sale_date", endDate)
         .neq("status", "cancelled");
 
       if (error) throw error;
 
-      const total = data.reduce((sum, sale) => sum + Number(sale.total_amount || 0), 0);
+      const total = data.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
       return total;
     },
   });
@@ -47,14 +47,14 @@ const Dashboard = () => {
 
       const { data, error } = await supabase
         .from("sales")
-        .select("total_amount")
+        .select("total")
         .gte("sale_date", startDate)
         .lte("sale_date", endDate)
         .neq("status", "cancelled");
 
       if (error) throw error;
 
-      const total = data.reduce((sum, sale) => sum + Number(sale.total_amount || 0), 0);
+      const total = data.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
       return total;
     },
   });
@@ -117,7 +117,7 @@ const Dashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
-        .select("id, sale_number, customer_name, total_amount, status, created_at")
+        .select("id, sale_number, customer_name, total, status, created_at")
         .order("created_at", { ascending: false })
         .limit(5);
 
@@ -316,7 +316,7 @@ const Dashboard = () => {
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",
-                      }).format(Number(sale.total_amount || 0))}
+                      }).format(Number(sale.total || 0))}
                     </p>
                   </div>
                 ))}
