@@ -166,11 +166,26 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
           credit_limit: data.credit_limit || null,
         };
 
-        if (initialData?.customers?.[0]) {
+        let customerId = initialData?.customers?.[0]?.id;
+
+        // Check if customer record exists in database for this person
+        if (!customerId && personId) {
+          const { data: existingCustomer } = await supabase
+            .from("customers")
+            .select("id")
+            .eq("person_id", personId)
+            .single();
+          
+          if (existingCustomer) {
+            customerId = existingCustomer.id;
+          }
+        }
+
+        if (customerId) {
           await supabase
             .from("customers")
             .update(customerData)
-            .eq("id", initialData.customers[0].id);
+            .eq("id", customerId);
         } else {
           await supabase.from("customers").insert([customerData]);
         }
@@ -211,11 +226,24 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
 
         let employeeId = initialData?.employees?.[0]?.id;
 
-        if (initialData?.employees?.[0]) {
+        // Check if employee record exists in database for this person
+        if (!employeeId && personId) {
+          const { data: existingEmployee } = await supabase
+            .from("employees")
+            .select("id")
+            .eq("person_id", personId)
+            .single();
+          
+          if (existingEmployee) {
+            employeeId = existingEmployee.id;
+          }
+        }
+
+        if (employeeId) {
           await supabase
             .from("employees")
             .update(employeeData)
-            .eq("id", initialData.employees[0].id);
+            .eq("id", employeeId);
         } else {
           const { data: newEmployee, error: empError } = await supabase
             .from("employees")
@@ -260,11 +288,26 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
           delivery_time_days: data.delivery_time_days || null,
         };
 
-        if (initialData?.suppliers?.[0]) {
+        let supplierId = initialData?.suppliers?.[0]?.id;
+
+        // Check if supplier record exists in database for this person
+        if (!supplierId && personId) {
+          const { data: existingSupplier } = await supabase
+            .from("suppliers")
+            .select("id")
+            .eq("person_id", personId)
+            .single();
+          
+          if (existingSupplier) {
+            supplierId = existingSupplier.id;
+          }
+        }
+
+        if (supplierId) {
           await supabase
             .from("suppliers")
             .update(supplierData)
-            .eq("id", initialData.suppliers[0].id);
+            .eq("id", supplierId);
         } else {
           await supabase.from("suppliers").insert([supplierData]);
         }
