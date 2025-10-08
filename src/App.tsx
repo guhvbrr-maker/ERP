@@ -24,6 +24,7 @@ import Fornecedores from "./pages/pessoas/Fornecedores";
 import Cargos from "./pages/pessoas/Cargos";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import Assistencias from "./pages/assistencias/Assistencias";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/estoque" element={<ProtectedRoute><MainLayout><Estoque /></MainLayout></ProtectedRoute>} />
             <Route path="/financeiro/contas-receber" element={<ProtectedRoute requiredRole="accountant"><MainLayout><ContasReceber /></MainLayout></ProtectedRoute>} />
             <Route path="/entregas" element={<ProtectedRoute><MainLayout><Entregas /></MainLayout></ProtectedRoute>} />
+            <Route path="/assistencias" element={<ProtectedRoute><MainLayout><Assistencias /></MainLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><MainLayout><Configuracoes /></MainLayout></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

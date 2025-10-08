@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      assistance_history: {
+        Row: {
+          assistance_id: string
+          change_type: string
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          new_value: string | null
+          notes: string | null
+          old_value: string | null
+        }
+        Insert: {
+          assistance_id: string
+          change_type: string
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          assistance_id?: string
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistance_history_assistance_id_fkey"
+            columns: ["assistance_id"]
+            isOneToOne: false
+            referencedRelation: "technical_assistances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           active: boolean | null
@@ -1055,6 +1096,112 @@ export type Database = {
           },
         ]
       }
+      technical_assistances: {
+        Row: {
+          assigned_to: string | null
+          assistance_number: string
+          completed_date: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          defect_description: string
+          expected_date: string | null
+          id: string
+          notes: string | null
+          opened_date: string
+          parts_cost: number | null
+          priority: string | null
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          sale_id: string | null
+          service_cost: number | null
+          solution_description: string | null
+          status: Database["public"]["Enums"]["assistance_status"]
+          total_cost: number | null
+          updated_at: string | null
+          warranty_status: boolean | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          assistance_number: string
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          defect_description: string
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          opened_date?: string
+          parts_cost?: number | null
+          priority?: string | null
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          sale_id?: string | null
+          service_cost?: number | null
+          solution_description?: string | null
+          status?: Database["public"]["Enums"]["assistance_status"]
+          total_cost?: number | null
+          updated_at?: string | null
+          warranty_status?: boolean | null
+        }
+        Update: {
+          assigned_to?: string | null
+          assistance_number?: string
+          completed_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          defect_description?: string
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          opened_date?: string
+          parts_cost?: number | null
+          priority?: string | null
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          sale_id?: string | null
+          service_cost?: number | null
+          solution_description?: string | null
+          status?: Database["public"]["Enums"]["assistance_status"]
+          total_cost?: number | null
+          updated_at?: string | null
+          warranty_status?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_assistances_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_assistances_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_assistances_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1120,6 +1267,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_assistance_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_sale_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1134,6 +1285,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "salesperson" | "accountant" | "warehouse"
+      assistance_status:
+        | "pending"
+        | "in_progress"
+        | "waiting_parts"
+        | "completed"
+        | "cancelled"
       contact_source:
         | "instagram"
         | "facebook"
@@ -1275,6 +1432,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "salesperson", "accountant", "warehouse"],
+      assistance_status: [
+        "pending",
+        "in_progress",
+        "waiting_parts",
+        "completed",
+        "cancelled",
+      ],
       contact_source: [
         "instagram",
         "facebook",

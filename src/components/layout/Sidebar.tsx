@@ -76,11 +76,6 @@ const menuItems = [
     icon: Wrench,
     label: "Assistências",
     path: "/assistencias",
-    submenu: [
-      { label: "Cliente", path: "/assistencias/cliente" },
-      { label: "Loja/Showroom", path: "/assistencias/loja" },
-      { label: "Depósito", path: "/assistencias/deposito" },
-    ],
   },
   {
     icon: DollarSign,
