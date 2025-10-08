@@ -55,6 +55,220 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          account_number: string | null
+          active: boolean | null
+          agency: string | null
+          bank_name: string | null
+          created_at: string | null
+          current_balance: number | null
+          id: string
+          initial_balance: number | null
+          name: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          active?: boolean | null
+          agency?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          current_balance?: number | null
+          id?: string
+          initial_balance?: number | null
+          name: string
+          type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          active?: boolean | null
+          agency?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          current_balance?: number | null
+          id?: string
+          initial_balance?: number | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      card_brands: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          created_at: string | null
+          icon_url: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          icon_url?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          icon_url?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      card_fees: {
+        Row: {
+          active: boolean | null
+          card_brand_id: string
+          created_at: string | null
+          days_to_receive: number | null
+          fee_percentage: number
+          fixed_fee: number | null
+          id: string
+          installments: number
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          card_brand_id: string
+          created_at?: string | null
+          days_to_receive?: number | null
+          fee_percentage?: number
+          fixed_fee?: number | null
+          id?: string
+          installments: number
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          card_brand_id?: string
+          created_at?: string | null
+          days_to_receive?: number | null
+          fee_percentage?: number
+          fixed_fee?: number | null
+          id?: string
+          installments?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_fees_card_brand_id_fkey"
+            columns: ["card_brand_id"]
+            isOneToOne: false
+            referencedRelation: "card_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_reconciliation_items: {
+        Row: {
+          created_at: string | null
+          expected_amount: number
+          expected_date: string
+          financial_account_id: string | null
+          id: string
+          is_reconciled: boolean | null
+          received_amount: number | null
+          reconciliation_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expected_amount: number
+          expected_date: string
+          financial_account_id?: string | null
+          id?: string
+          is_reconciled?: boolean | null
+          received_amount?: number | null
+          reconciliation_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expected_amount?: number
+          expected_date?: string
+          financial_account_id?: string | null
+          id?: string
+          is_reconciled?: boolean | null
+          received_amount?: number | null
+          reconciliation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_reconciliation_items_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_reconciliation_items_reconciliation_id_fkey"
+            columns: ["reconciliation_id"]
+            isOneToOne: false
+            referencedRelation: "card_reconciliations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_reconciliations: {
+        Row: {
+          card_brand_id: string
+          created_at: string | null
+          difference: number | null
+          expected_amount: number
+          id: string
+          notes: string | null
+          received_amount: number | null
+          reconciled_at: string | null
+          reconciled_by: string | null
+          reference_date: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          card_brand_id: string
+          created_at?: string | null
+          difference?: number | null
+          expected_amount: number
+          id?: string
+          notes?: string | null
+          received_amount?: number | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reference_date: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          card_brand_id?: string
+          created_at?: string | null
+          difference?: number | null
+          expected_amount?: number
+          id?: string
+          notes?: string | null
+          received_amount?: number | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reference_date?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_reconciliations_card_brand_id_fkey"
+            columns: ["card_brand_id"]
+            isOneToOne: false
+            referencedRelation: "card_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           active: boolean | null
@@ -313,6 +527,142 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_accounts: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          amount: number
+          bank_account_id: string | null
+          card_brand_id: string | null
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_id: string | null
+          description: string
+          document_number: string | null
+          due_date: string
+          fee_amount: number | null
+          fee_percentage: number | null
+          id: string
+          installment_number: number | null
+          installments: number | null
+          net_amount: number | null
+          notes: string | null
+          paid_amount: number | null
+          parent_account_id: string | null
+          payment_date: string | null
+          payment_method_id: string | null
+          recurrence_end_date: string | null
+          recurrence_type: Database["public"]["Enums"]["recurrence_type"] | null
+          remaining_amount: number
+          sale_id: string | null
+          status: Database["public"]["Enums"]["payment_status_type"]
+          supplier_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          amount: number
+          bank_account_id?: string | null
+          card_brand_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          description: string
+          document_number?: string | null
+          due_date: string
+          fee_amount?: number | null
+          fee_percentage?: number | null
+          id?: string
+          installment_number?: number | null
+          installments?: number | null
+          net_amount?: number | null
+          notes?: string | null
+          paid_amount?: number | null
+          parent_account_id?: string | null
+          payment_date?: string | null
+          payment_method_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_type?:
+            | Database["public"]["Enums"]["recurrence_type"]
+            | null
+          remaining_amount: number
+          sale_id?: string | null
+          status?: Database["public"]["Enums"]["payment_status_type"]
+          supplier_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          amount?: number
+          bank_account_id?: string | null
+          card_brand_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          description?: string
+          document_number?: string | null
+          due_date?: string
+          fee_amount?: number | null
+          fee_percentage?: number | null
+          id?: string
+          installment_number?: number | null
+          installments?: number | null
+          net_amount?: number | null
+          notes?: string | null
+          paid_amount?: number | null
+          parent_account_id?: string | null
+          payment_date?: string | null
+          payment_method_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_type?:
+            | Database["public"]["Enums"]["recurrence_type"]
+            | null
+          remaining_amount?: number
+          sale_id?: string | null
+          status?: Database["public"]["Enums"]["payment_status_type"]
+          supplier_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_accounts_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_accounts_card_brand_id_fkey"
+            columns: ["card_brand_id"]
+            isOneToOne: false
+            referencedRelation: "card_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_accounts_parent_account_id_fkey"
+            columns: ["parent_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_accounts_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_accounts_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           active: boolean | null
@@ -339,6 +689,97 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          has_fees: boolean | null
+          has_installments: boolean | null
+          id: string
+          name: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          has_fees?: boolean | null
+          has_installments?: boolean | null
+          id?: string
+          name: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          has_fees?: boolean | null
+          has_installments?: boolean | null
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string | null
+          created_by: string | null
+          financial_account_id: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method_id: string | null
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          financial_account_id: string
+          id?: string
+          notes?: string | null
+          payment_date: string
+          payment_method_id?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          financial_account_id?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       people: {
         Row: {
@@ -1284,6 +1725,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_type: "receivable" | "payable"
       app_role: "admin" | "manager" | "salesperson" | "accountant" | "warehouse"
       assistance_status:
         | "pending"
@@ -1303,7 +1745,19 @@ export type Database = {
         | "whatsapp"
         | "website"
         | "outros"
+      payment_status_type:
+        | "pending"
+        | "partially_paid"
+        | "paid"
+        | "overdue"
+        | "cancelled"
       person_type: "customer" | "employee" | "supplier"
+      recurrence_type:
+        | "installment"
+        | "monthly"
+        | "biweekly"
+        | "annual"
+        | "none"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1431,6 +1885,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["receivable", "payable"],
       app_role: ["admin", "manager", "salesperson", "accountant", "warehouse"],
       assistance_status: [
         "pending",
@@ -1452,7 +1907,15 @@ export const Constants = {
         "website",
         "outros",
       ],
+      payment_status_type: [
+        "pending",
+        "partially_paid",
+        "paid",
+        "overdue",
+        "cancelled",
+      ],
       person_type: ["customer", "employee", "supplier"],
+      recurrence_type: ["installment", "monthly", "biweekly", "annual", "none"],
     },
   },
 } as const

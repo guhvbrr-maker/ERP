@@ -25,6 +25,7 @@ import Cargos from "./pages/pessoas/Cargos";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Assistencias from "./pages/assistencias/Assistencias";
+import Financeiro from "./pages/financeiro/Financeiro";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +52,7 @@ const App = () => (
             <Route path="/vendas/nova" element={<ProtectedRoute><MainLayout><NovaVenda /></MainLayout></ProtectedRoute>} />
             <Route path="/vendas/:id" element={<ProtectedRoute><MainLayout><DetalheVenda /></MainLayout></ProtectedRoute>} />
             <Route path="/estoque" element={<ProtectedRoute><MainLayout><Estoque /></MainLayout></ProtectedRoute>} />
-            <Route path="/financeiro/contas-receber" element={<ProtectedRoute requiredRole="accountant"><MainLayout><ContasReceber /></MainLayout></ProtectedRoute>} />
+            <Route path="/financeiro" element={<ProtectedRoute requiredRole="accountant"><MainLayout><Financeiro /></MainLayout></ProtectedRoute>} />
             <Route path="/entregas" element={<ProtectedRoute><MainLayout><Entregas /></MainLayout></ProtectedRoute>} />
             <Route path="/assistencias" element={<ProtectedRoute><MainLayout><Assistencias /></MainLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><MainLayout><Configuracoes /></MainLayout></ProtectedRoute>} />
