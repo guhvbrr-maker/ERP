@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SalePaymentManager, PaymentPlan } from "@/components/vendas/SalePaymentManager";
 import { CustomerSelector } from "@/components/vendas/CustomerSelector";
+import { DeliveryPreferences, DeliveryPreferencesData } from "@/components/vendas/DeliveryPreferences";
 
 const saleSchema = z.object({
   customer_name: z.string().min(1, "Nome do cliente é obrigatório"),
@@ -53,6 +54,7 @@ const NovaVenda = () => {
   const [searchProduct, setSearchProduct] = useState("");
   const [showProductSearch, setShowProductSearch] = useState(false);
   const [payments, setPayments] = useState<PaymentPlan[]>([]);
+  const [deliveryPreferences, setDeliveryPreferences] = useState<DeliveryPreferencesData | null>(null);
 
   const form = useForm<SaleForm>({
     resolver: zodResolver(saleSchema),
@@ -190,6 +192,30 @@ const NovaVenda = () => {
         .insert(saleItems);
 
       if (itemsError) throw itemsError;
+
+      // Criar entrega automática quando há endereço
+      if (data.delivery_address && data.delivery_city) {
+        const { error: deliveryError } = await supabase
+          .from("sale_deliveries")
+          .insert([
+            {
+              sale_id: sale.id,
+              address: `${data.delivery_address}, ${data.delivery_number || "S/N"}${
+                data.delivery_complement ? ` - ${data.delivery_complement}` : ""
+              }`,
+              city: data.delivery_city,
+              state: data.delivery_state || null,
+              zipcode: data.delivery_zipcode || null,
+              scheduled_date: data.sale_date,
+              status: "pending",
+              delivery_preferences: deliveryPreferences ? JSON.parse(JSON.stringify(deliveryPreferences)) : null,
+              priority: deliveryPreferences?.priority || "normal",
+              notes: deliveryPreferences?.notes || null,
+            },
+          ]);
+
+        if (deliveryError) throw deliveryError;
+      }
 
       // Criar contas a receber para cada pagamento
       if (payments.length > 0) {
@@ -660,6 +686,16 @@ const NovaVenda = () => {
             totalAmount={total}
             payments={payments}
             onChange={setPayments}
+          />
+
+          <DeliveryPreferences
+            value={deliveryPreferences || undefined}
+            onChange={setDeliveryPreferences}
+          />
+
+          <DeliveryPreferences
+            value={deliveryPreferences || undefined}
+            onChange={setDeliveryPreferences}
           />
 
           <Card>

@@ -1464,8 +1464,10 @@ export type Database = {
           delivery_commission_amount: number | null
           delivery_date: string | null
           delivery_employee_id: string | null
+          delivery_preferences: Json | null
           id: string
           notes: string | null
+          priority: string | null
           requires_assembly: boolean | null
           sale_id: string
           scheduled_date: string
@@ -1481,8 +1483,10 @@ export type Database = {
           delivery_commission_amount?: number | null
           delivery_date?: string | null
           delivery_employee_id?: string | null
+          delivery_preferences?: Json | null
           id?: string
           notes?: string | null
+          priority?: string | null
           requires_assembly?: boolean | null
           sale_id: string
           scheduled_date: string
@@ -1498,8 +1502,10 @@ export type Database = {
           delivery_commission_amount?: number | null
           delivery_date?: string | null
           delivery_employee_id?: string | null
+          delivery_preferences?: Json | null
           id?: string
           notes?: string | null
+          priority?: string | null
           requires_assembly?: boolean | null
           sale_id?: string
           scheduled_date?: string

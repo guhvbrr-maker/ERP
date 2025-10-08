@@ -172,7 +172,7 @@ const Entregas = () => {
           <TableHead>Cliente</TableHead>
           <TableHead>Endereço</TableHead>
           <TableHead>Data Agendada</TableHead>
-          <TableHead>Entregador</TableHead>
+          <TableHead>Entregador / Prioridade</TableHead>
           <TableHead>Montagem</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Ações</TableHead>
@@ -200,14 +200,37 @@ const Entregas = () => {
                   </div>
                 )}
               </TableCell>
-              <TableCell>
-                {format(new Date(delivery.scheduled_date), "dd/MM/yyyy", { locale: ptBR })}
-              </TableCell>
-              <TableCell>
-                {delivery.delivery_employee?.people?.name || (
-                  <span className="text-muted-foreground text-sm">Não atribuído</span>
-                )}
-              </TableCell>
+               <TableCell>
+                 {format(new Date(delivery.scheduled_date), "dd/MM/yyyy", { locale: ptBR })}
+               </TableCell>
+               <TableCell>
+                 <div className="space-y-1">
+                   {delivery.delivery_employee?.people?.name || (
+                     <span className="text-muted-foreground text-sm">Não atribuído</span>
+                   )}
+                   {delivery.priority && delivery.priority !== "normal" && (
+                     <div>
+                       <Badge
+                         variant={
+                           delivery.priority === "urgent"
+                             ? "destructive"
+                             : delivery.priority === "high"
+                             ? "warning"
+                             : "secondary"
+                         }
+                       >
+                         {delivery.priority === "urgent"
+                           ? "Urgente"
+                           : delivery.priority === "high"
+                           ? "Alta"
+                           : delivery.priority === "low"
+                           ? "Baixa"
+                           : "Normal"}
+                       </Badge>
+                     </div>
+                   )}
+                 </div>
+               </TableCell>
               <TableCell>
                 {delivery.requires_assembly ? (
                   <Badge variant="secondary">
@@ -356,6 +379,54 @@ const Entregas = () => {
           </DialogHeader>
           {selectedDelivery && (
             <div className="space-y-4">
+              {/* Mostrar preferências de entrega se existirem */}
+              {selectedDelivery.delivery_preferences && (
+                <div className="p-4 bg-muted rounded-lg space-y-2">
+                  <Label className="text-sm font-medium">Preferências de Entrega do Cliente:</Label>
+                  <div className="text-sm space-y-1">
+                    {selectedDelivery.delivery_preferences.days
+                      ?.filter((d: any) => d.enabled)
+                      .map((day: any) => (
+                        <div key={day.day} className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {
+                              {
+                                monday: "Segunda",
+                                tuesday: "Terça",
+                                wednesday: "Quarta",
+                                thursday: "Quinta",
+                                friday: "Sexta",
+                                saturday: "Sábado",
+                                sunday: "Domingo",
+                              }[day.day]
+                            }
+                            :
+                          </span>
+                          <span>
+                            {day.timeSlots
+                              ?.map((slot: any) => {
+                                if (slot.period === "custom") {
+                                  return `${slot.customStart || ""}-${slot.customEnd || ""}`;
+                                }
+                                return {
+                                  morning: "Manhã",
+                                  afternoon: "Tarde",
+                                  evening: "Noite",
+                                }[slot.period];
+                              })
+                              .join(", ")}
+                          </span>
+                        </div>
+                      ))}
+                    {selectedDelivery.delivery_preferences.notes && (
+                      <div className="text-muted-foreground italic">
+                        Obs: {selectedDelivery.delivery_preferences.notes}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Entregador</Label>
                 <Select
@@ -405,6 +476,26 @@ const Entregas = () => {
               </div>
 
               <div className="space-y-2">
+                <Label>Prioridade</Label>
+                <Select
+                  value={selectedDelivery.priority || "normal"}
+                  onValueChange={(value) =>
+                    setSelectedDelivery({ ...selectedDelivery, priority: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Baixa</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">Alta</SelectItem>
+                    <SelectItem value="urgent">Urgente</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label>Status</Label>
                 <Select
                   value={selectedDelivery.status}
@@ -437,6 +528,7 @@ const Entregas = () => {
                         delivery_employee_id: selectedDelivery.delivery_employee_id,
                         delivery_commission_amount: selectedDelivery.delivery_commission_amount,
                         requires_assembly: selectedDelivery.requires_assembly,
+                        priority: selectedDelivery.priority,
                         status: selectedDelivery.status,
                       },
                     })
