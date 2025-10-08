@@ -484,21 +484,21 @@ const NovaVenda = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Vendedor</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um vendedor" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {employees.map((employee: any) => (
-                            <SelectItem key={employee.id} value={employee.id}>
-                              {employee.people.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                       <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value}>
+                         <FormControl>
+                           <SelectTrigger>
+                             <SelectValue placeholder="Selecione um vendedor" />
+                           </SelectTrigger>
+                         </FormControl>
+                         <SelectContent>
+                           <SelectItem value="none">Nenhum</SelectItem>
+                           {employees.map((employee: any) => (
+                             <SelectItem key={employee.id} value={employee.id}>
+                               {employee.people.name}
+                             </SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}

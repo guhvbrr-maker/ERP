@@ -293,7 +293,11 @@ const DetalheVenda = () => {
               {sale.employees && (
                 <div>
                   <div className="text-sm text-muted-foreground">Vendedor</div>
-                  <div className="font-medium">{sale.employees.people.name}</div>
+                  <div className="font-medium">
+                    {Array.isArray(sale.employees)
+                      ? sale.employees[0]?.people?.name
+                      : (sale.employees as any)?.people?.name}
+                  </div>
                 </div>
               )}
             </CardContent>
