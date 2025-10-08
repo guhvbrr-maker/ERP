@@ -1,4 +1,4 @@
-import { Bell, Menu, Search, User } from "lucide-react";
+import { Bell, Menu, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,12 +9,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export const Header = ({ onMenuClick }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Logout realizado com sucesso!");
+    navigate("/login");
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-card px-6 shadow-soft">
       <Button
@@ -54,15 +66,13 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div>
-                <p className="text-sm font-medium">Admin Karina</p>
-                <p className="text-xs text-muted-foreground">admin@moveiskarina.com</p>
+                <p className="text-sm font-medium">{user?.email}</p>
+                <p className="text-xs text-muted-foreground">Usuário</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
-            <DropdownMenuItem>Configurações</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

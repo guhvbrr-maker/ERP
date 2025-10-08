@@ -3,6 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Categorias from "./pages/produtos/Categorias";
@@ -25,32 +29,35 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<MainLayout><Dashboard /></MainLayout>} />
-          <Route path="/pessoas/clientes" element={<MainLayout><Clientes /></MainLayout>} />
-          <Route path="/pessoas/funcionarios" element={<MainLayout><Funcionarios /></MainLayout>} />
-          <Route path="/pessoas/fornecedores" element={<MainLayout><Fornecedores /></MainLayout>} />
-          <Route path="/pessoas/cargos" element={<MainLayout><Cargos /></MainLayout>} />
-          <Route path="/produtos/categorias" element={<MainLayout><Categorias /></MainLayout>} />
-          <Route path="/produtos/catalogo" element={<MainLayout><Catalogo /></MainLayout>} />
-          <Route path="/produtos/catalogo/novo" element={<MainLayout><FormularioProduto /></MainLayout>} />
-          <Route path="/produtos/catalogo/:id/editar" element={<MainLayout><FormularioProduto /></MainLayout>} />
-          <Route path="/vendas" element={<MainLayout><Vendas /></MainLayout>} />
-          <Route path="/vendas/nova" element={<MainLayout><NovaVenda /></MainLayout>} />
-          <Route path="/vendas/:id" element={<MainLayout><DetalheVenda /></MainLayout>} />
-          <Route path="/estoque" element={<MainLayout><Estoque /></MainLayout>} />
-          <Route path="/financeiro/contas-receber" element={<MainLayout><ContasReceber /></MainLayout>} />
-          <Route path="/entregas" element={<MainLayout><Entregas /></MainLayout>} />
-          <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
+            <Route path="/pessoas/clientes" element={<ProtectedRoute><MainLayout><Clientes /></MainLayout></ProtectedRoute>} />
+            <Route path="/pessoas/funcionarios" element={<ProtectedRoute requiredRole="manager"><MainLayout><Funcionarios /></MainLayout></ProtectedRoute>} />
+            <Route path="/pessoas/fornecedores" element={<ProtectedRoute requiredRole="manager"><MainLayout><Fornecedores /></MainLayout></ProtectedRoute>} />
+            <Route path="/pessoas/cargos" element={<ProtectedRoute requiredRole="manager"><MainLayout><Cargos /></MainLayout></ProtectedRoute>} />
+            <Route path="/produtos/categorias" element={<ProtectedRoute><MainLayout><Categorias /></MainLayout></ProtectedRoute>} />
+            <Route path="/produtos/catalogo" element={<ProtectedRoute><MainLayout><Catalogo /></MainLayout></ProtectedRoute>} />
+            <Route path="/produtos/catalogo/novo" element={<ProtectedRoute><MainLayout><FormularioProduto /></MainLayout></ProtectedRoute>} />
+            <Route path="/produtos/catalogo/:id/editar" element={<ProtectedRoute><MainLayout><FormularioProduto /></MainLayout></ProtectedRoute>} />
+            <Route path="/vendas" element={<ProtectedRoute><MainLayout><Vendas /></MainLayout></ProtectedRoute>} />
+            <Route path="/vendas/nova" element={<ProtectedRoute><MainLayout><NovaVenda /></MainLayout></ProtectedRoute>} />
+            <Route path="/vendas/:id" element={<ProtectedRoute><MainLayout><DetalheVenda /></MainLayout></ProtectedRoute>} />
+            <Route path="/estoque" element={<ProtectedRoute><MainLayout><Estoque /></MainLayout></ProtectedRoute>} />
+            <Route path="/financeiro/contas-receber" element={<ProtectedRoute requiredRole="accountant"><MainLayout><ContasReceber /></MainLayout></ProtectedRoute>} />
+            <Route path="/entregas" element={<ProtectedRoute><MainLayout><Entregas /></MainLayout></ProtectedRoute>} />
+            <Route path="/configuracoes" element={<ProtectedRoute requiredRole="admin"><MainLayout><Configuracoes /></MainLayout></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
