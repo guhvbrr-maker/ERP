@@ -3,11 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Printer, Edit, Loader2 } from "lucide-react";
+import { ArrowLeft, Printer, Edit, Loader2, AlertTriangle } from "lucide-react";
 import { ImpressaoVenda } from "@/components/vendas/ImpressaoVenda";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -49,7 +50,15 @@ const DetalheVenda = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
-        .select("*")
+        .select(`
+          *,
+          employees (
+            id,
+            people (
+              name
+            )
+          )
+        `)
         .eq("id", id)
         .single();
 
@@ -164,6 +173,15 @@ const DetalheVenda = () => {
         </div>
       </div>
 
+      <Alert className="print:hidden">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Gerenciamento Automático de Estoque</AlertTitle>
+        <AlertDescription>
+          Ao alterar o status para "Confirmada" ou "Concluída", o estoque será automaticamente deduzido. 
+          Se cancelar uma venda confirmada, o estoque será restaurado.
+        </AlertDescription>
+      </Alert>
+
       <div className="grid grid-cols-3 gap-4 print:hidden">
         <Card>
           <CardHeader className="pb-3">
@@ -270,6 +288,12 @@ const DetalheVenda = () => {
                 <div>
                   <div className="text-sm text-muted-foreground">Telefone</div>
                   <div className="font-medium">{sale.customer_phone}</div>
+                </div>
+              )}
+              {sale.employees && (
+                <div>
+                  <div className="text-sm text-muted-foreground">Vendedor</div>
+                  <div className="font-medium">{sale.employees.people.name}</div>
                 </div>
               )}
             </CardContent>
