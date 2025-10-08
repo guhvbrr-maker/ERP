@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2 } from "lucide-react";
+import { CepAddressForm } from "@/components/common/CepAddressForm";
 
 interface FormularioPessoaProps {
   type: "customer" | "employee" | "supplier";
@@ -350,42 +351,22 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
         </TabsContent>
 
         <TabsContent value="endereco" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="zipcode">CEP</Label>
-              <Input id="zipcode" {...register("zipcode")} />
-            </div>
-
-            <div>
-              <Label htmlFor="address_number">Número</Label>
-              <Input id="address_number" {...register("address_number")} />
-            </div>
-
-            <div className="col-span-2">
-              <Label htmlFor="address">Logradouro</Label>
-              <Input id="address" {...register("address")} />
-            </div>
-
-            <div>
-              <Label htmlFor="address_complement">Complemento</Label>
-              <Input id="address_complement" {...register("address_complement")} />
-            </div>
-
-            <div>
-              <Label htmlFor="neighborhood">Bairro</Label>
-              <Input id="neighborhood" {...register("neighborhood")} />
-            </div>
-
-            <div>
-              <Label htmlFor="city">Cidade</Label>
-              <Input id="city" {...register("city")} />
-            </div>
-
-            <div>
-              <Label htmlFor="state">Estado</Label>
-              <Input id="state" maxLength={2} {...register("state")} placeholder="UF" />
-            </div>
-          </div>
+          <CepAddressForm
+            cep={watch("zipcode")}
+            logradouro={watch("address")}
+            numero={watch("address_number")}
+            complemento={watch("address_complement")}
+            bairro={watch("neighborhood")}
+            cidade={watch("city")}
+            uf={watch("state")}
+            onCepChange={(value) => setValue("zipcode", value)}
+            onLogradouroChange={(value) => setValue("address", value)}
+            onNumeroChange={(value) => setValue("address_number", value)}
+            onComplementoChange={(value) => setValue("address_complement", value)}
+            onBairroChange={(value) => setValue("neighborhood", value)}
+            onCidadeChange={(value) => setValue("city", value)}
+            onUfChange={(value) => setValue("state", value)}
+          />
         </TabsContent>
 
         <TabsContent value="especificos" className="space-y-4 mt-4">
