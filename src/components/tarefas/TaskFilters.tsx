@@ -41,12 +41,12 @@ export function TaskFilters({ filters, onFiltersChange, departments, employees }
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <Label>Status</Label>
-          <Select value={filters.status} onValueChange={(value) => onFiltersChange({ ...filters, status: value })}>
+          <Select value={filters.status || "all"} onValueChange={(value) => onFiltersChange({ ...filters, status: value === "all" ? "" : value })}>
             <SelectTrigger>
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="pending">Pendente</SelectItem>
               <SelectItem value="in_progress">Em Andamento</SelectItem>
               <SelectItem value="blocked">Bloqueado</SelectItem>
@@ -59,12 +59,12 @@ export function TaskFilters({ filters, onFiltersChange, departments, employees }
 
         <div>
           <Label>Prioridade</Label>
-          <Select value={filters.priority} onValueChange={(value) => onFiltersChange({ ...filters, priority: value })}>
+          <Select value={filters.priority || "all"} onValueChange={(value) => onFiltersChange({ ...filters, priority: value === "all" ? "" : value })}>
             <SelectTrigger>
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               <SelectItem value="low">Baixa</SelectItem>
               <SelectItem value="normal">Normal</SelectItem>
               <SelectItem value="high">Alta</SelectItem>
@@ -75,12 +75,12 @@ export function TaskFilters({ filters, onFiltersChange, departments, employees }
 
         <div>
           <Label>Departamento</Label>
-          <Select value={filters.department} onValueChange={(value) => onFiltersChange({ ...filters, department: value })}>
+          <Select value={filters.department || "all"} onValueChange={(value) => onFiltersChange({ ...filters, department: value === "all" ? "" : value })}>
             <SelectTrigger>
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
@@ -92,12 +92,12 @@ export function TaskFilters({ filters, onFiltersChange, departments, employees }
 
         <div>
           <Label>Atribuído a</Label>
-          <Select value={filters.assignedTo} onValueChange={(value) => onFiltersChange({ ...filters, assignedTo: value })}>
+          <Select value={filters.assignedTo || "all"} onValueChange={(value) => onFiltersChange({ ...filters, assignedTo: value === "all" ? "" : value })}>
             <SelectTrigger>
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {employees.map((emp) => (
                 <SelectItem key={emp.id} value={emp.id}>
                   {emp.name}

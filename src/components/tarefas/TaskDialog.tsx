@@ -160,12 +160,12 @@ export function TaskDialog({ open, onOpenChange, task, departments, employees }:
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="department_id">Departamento</Label>
-              <Select value={watch("department_id")} onValueChange={(value) => setValue("department_id", value)}>
+              <Select value={watch("department_id") || "none"} onValueChange={(value) => setValue("department_id", value === "none" ? "" : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
+                  <SelectItem value="none">Nenhum</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -177,12 +177,12 @@ export function TaskDialog({ open, onOpenChange, task, departments, employees }:
 
             <div>
               <Label htmlFor="assigned_to">Atribuir a</Label>
-              <Select value={watch("assigned_to")} onValueChange={(value) => setValue("assigned_to", value)}>
+              <Select value={watch("assigned_to") || "unassigned"} onValueChange={(value) => setValue("assigned_to", value === "unassigned" ? "" : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Ninguém</SelectItem>
+                  <SelectItem value="unassigned">Ninguém</SelectItem>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>
                       {emp.name}
