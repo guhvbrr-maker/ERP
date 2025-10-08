@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SalePaymentManager, PaymentPlan } from "@/components/vendas/SalePaymentManager";
+import { CustomerSelector } from "@/components/vendas/CustomerSelector";
 
 const saleSchema = z.object({
   customer_name: z.string().min(1, "Nome do cliente é obrigatório"),
@@ -23,6 +24,14 @@ const saleSchema = z.object({
   customer_phone: z.string().optional(),
   sale_date: z.string(),
   notes: z.string().optional(),
+  // Endereço de entrega
+  delivery_address: z.string().optional(),
+  delivery_number: z.string().optional(),
+  delivery_complement: z.string().optional(),
+  delivery_neighborhood: z.string().optional(),
+  delivery_city: z.string().optional(),
+  delivery_state: z.string().optional(),
+  delivery_zipcode: z.string().optional(),
 });
 
 type SaleForm = z.infer<typeof saleSchema>;
@@ -54,6 +63,13 @@ const NovaVenda = () => {
       customer_phone: "",
       sale_date: new Date().toISOString().split("T")[0],
       notes: "",
+      delivery_address: "",
+      delivery_number: "",
+      delivery_complement: "",
+      delivery_neighborhood: "",
+      delivery_city: "",
+      delivery_state: "",
+      delivery_zipcode: "",
     },
   });
 
@@ -263,6 +279,27 @@ const NovaVenda = () => {
           <Card>
             <CardHeader>
               <CardTitle>Dados do Cliente</CardTitle>
+              <div className="mt-2">
+                <CustomerSelector
+                  onSelect={(customer) => {
+                    form.setValue("customer_name", customer.people.name);
+                    form.setValue("customer_document", customer.people.document || "");
+                    form.setValue("customer_email", customer.people.email || "");
+                    form.setValue("customer_phone", customer.people.phone || "");
+                    
+                    // Preencher endereço de entrega com os dados do cliente
+                    if (customer.people.address) {
+                      form.setValue("delivery_address", customer.people.address);
+                      form.setValue("delivery_number", customer.people.address_number || "");
+                      form.setValue("delivery_complement", customer.people.address_complement || "");
+                      form.setValue("delivery_neighborhood", customer.people.neighborhood || "");
+                      form.setValue("delivery_city", customer.people.city || "");
+                      form.setValue("delivery_state", customer.people.state || "");
+                      form.setValue("delivery_zipcode", customer.people.zipcode || "");
+                    }
+                  }}
+                />
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -332,6 +369,118 @@ const NovaVenda = () => {
                       <FormLabel>Data da Venda</FormLabel>
                       <FormControl>
                         <Input {...field} type="date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Endereço de Entrega</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Preencha caso seja diferente do endereço do cliente
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-4 gap-4">
+                <FormField
+                  control={form.control}
+                  name="delivery_address"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Rua, Avenida..." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="delivery_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="123" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="delivery_complement"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Complemento</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Apto, Bloco..." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                <FormField
+                  control={form.control}
+                  name="delivery_neighborhood"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bairro</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Bairro" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="delivery_city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Cidade" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="delivery_state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="UF" maxLength={2} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="delivery_zipcode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CEP</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="00000-000" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

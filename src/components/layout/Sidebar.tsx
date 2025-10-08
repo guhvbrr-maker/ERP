@@ -45,6 +45,8 @@ const menuItems = [
     submenu: [
       { label: "Catálogo", path: "/produtos/catalogo" },
       { label: "Categorias", path: "/produtos/categorias" },
+      { label: "Materiais", path: "/produtos/materiais" },
+      { label: "Tecidos", path: "/produtos/tecidos" },
     ],
   },
   {

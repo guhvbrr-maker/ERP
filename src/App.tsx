@@ -26,6 +26,8 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Assistencias from "./pages/assistencias/Assistencias";
 import Financeiro from "./pages/financeiro/Financeiro";
+import Materiais from "./pages/produtos/Materiais";
+import Tecidos from "./pages/produtos/Tecidos";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,8 @@ const App = () => (
             <Route path="/produtos/catalogo" element={<ProtectedRoute><MainLayout><Catalogo /></MainLayout></ProtectedRoute>} />
             <Route path="/produtos/catalogo/novo" element={<ProtectedRoute><MainLayout><FormularioProduto /></MainLayout></ProtectedRoute>} />
             <Route path="/produtos/catalogo/:id/editar" element={<ProtectedRoute><MainLayout><FormularioProduto /></MainLayout></ProtectedRoute>} />
+            <Route path="/produtos/materiais" element={<ProtectedRoute><MainLayout><Materiais /></MainLayout></ProtectedRoute>} />
+            <Route path="/produtos/tecidos" element={<ProtectedRoute><MainLayout><Tecidos /></MainLayout></ProtectedRoute>} />
             <Route path="/vendas" element={<ProtectedRoute><MainLayout><Vendas /></MainLayout></ProtectedRoute>} />
             <Route path="/vendas/nova" element={<ProtectedRoute><MainLayout><NovaVenda /></MainLayout></ProtectedRoute>} />
             <Route path="/vendas/:id" element={<ProtectedRoute><MainLayout><DetalheVenda /></MainLayout></ProtectedRoute>} />
