@@ -81,9 +81,6 @@ const menuItems = [
     icon: DollarSign,
     label: "Financeiro",
     path: "/financeiro",
-    submenu: [
-      { label: "Contas a Receber", path: "/financeiro/contas-receber" },
-    ],
   },
   {
     icon: CreditCard,
