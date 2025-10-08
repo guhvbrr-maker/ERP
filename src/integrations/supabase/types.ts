@@ -1201,6 +1201,178 @@ export type Database = {
           },
         ]
       }
+      purchase_items: {
+        Row: {
+          created_at: string | null
+          discount: number | null
+          id: string
+          product_id: string
+          product_name: string
+          product_sku: string
+          purchase_id: string
+          quantity: number
+          received_quantity: number | null
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          discount?: number | null
+          id?: string
+          product_id: string
+          product_name: string
+          product_sku: string
+          purchase_id: string
+          quantity: number
+          received_quantity?: number | null
+          total: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          discount?: number | null
+          id?: string
+          product_id?: string
+          product_name?: string
+          product_sku?: string
+          purchase_id?: string
+          quantity?: number
+          received_quantity?: number | null
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_items_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_suggestions: {
+        Row: {
+          created_at: string | null
+          id: string
+          priority: string | null
+          product_id: string
+          reason: string | null
+          status: string | null
+          suggested_quantity: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          product_id: string
+          reason?: string | null
+          status?: string | null
+          suggested_quantity: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          product_id?: string
+          reason?: string | null
+          status?: string | null
+          suggested_quantity?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_suggestions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchases: {
+        Row: {
+          access_token: string | null
+          actual_delivery_date: string | null
+          created_at: string | null
+          created_by: string | null
+          discount: number | null
+          expected_delivery_date: string | null
+          id: string
+          notes: string | null
+          other_costs: number | null
+          payment_terms: string | null
+          purchase_date: string
+          purchase_number: string
+          shipping_cost: number | null
+          status: string
+          subtotal: number
+          supplier_id: string
+          token_expires_at: string | null
+          total: number
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          actual_delivery_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          discount?: number | null
+          expected_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          other_costs?: number | null
+          payment_terms?: string | null
+          purchase_date?: string
+          purchase_number: string
+          shipping_cost?: number | null
+          status?: string
+          subtotal?: number
+          supplier_id: string
+          token_expires_at?: string | null
+          total?: number
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          actual_delivery_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          discount?: number | null
+          expected_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          other_costs?: number | null
+          payment_terms?: string | null
+          purchase_date?: string
+          purchase_number?: string
+          shipping_cost?: number | null
+          status?: string
+          subtotal?: number
+          supplier_id?: string
+          token_expires_at?: string | null
+          total?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_deliveries: {
         Row: {
           address: string
@@ -1708,7 +1880,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_purchase_suggestions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_assistance_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_purchase_access_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_purchase_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
