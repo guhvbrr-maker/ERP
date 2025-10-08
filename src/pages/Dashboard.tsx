@@ -177,16 +177,16 @@ const Dashboard = () => {
     queryKey: ["assistances-summary"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("assistances")
-        .select("id, status, created_at, scheduled_date");
+        .from("technical_assistances")
+        .select("id, status, created_at, opened_date");
 
       if (error) throw error;
 
-      const open = data.filter(a => a.status === "open").length;
+      const open = data.filter(a => a.status === "pending").length;
       const inProgress = data.filter(a => a.status === "in_progress").length;
-      const scheduled = data.filter(a => a.status === "scheduled").length;
+      const waitingParts = data.filter(a => a.status === "waiting_parts").length;
 
-      return { total: data.length, open, inProgress, scheduled };
+      return { total: data.length, open, inProgress, waitingParts };
     },
   });
 

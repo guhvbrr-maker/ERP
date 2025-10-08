@@ -69,11 +69,23 @@ export default function Tarefas() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("employees")
-        .select("*")
-        .eq("active", true)
-        .order("name");
+        .select(`
+          id,
+          people (
+            id,
+            name,
+            active
+          )
+        `);
       if (error) throw error;
-      return data;
+      // Filter active employees and flatten the structure
+      return data
+        .filter((emp: any) => emp.people?.active)
+        .map((emp: any) => ({
+          id: emp.id,
+          name: emp.people?.name || "Unknown",
+        }))
+        .sort((a: any, b: any) => a.name.localeCompare(b.name));
     },
   });
 
