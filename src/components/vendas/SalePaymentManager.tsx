@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,28 @@ interface SalePaymentManagerProps {
   onChange: (payments: PaymentPlan[]) => void;
 }
 
+type PaymentMethodType = "cash" | "credit_card" | "debit_card" | "pix" | "bank_slip" | string;
+
+interface PaymentMethod {
+  id: string;
+  name: string;
+  type: PaymentMethodType;
+  has_installments: boolean;
+  has_fees: boolean;
+}
+
+interface CardBrand {
+  id: string;
+  name: string;
+}
+
+interface CardFee {
+  id: string;
+  installments: number;
+  fee_percentage: number;
+  fixed_fee?: number | null;
+}
+
 export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaymentManagerProps) => {
   const [selectedMethod, setSelectedMethod] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -39,7 +61,7 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-  const { data: paymentMethods = [] } = useQuery({
+  const { data: paymentMethods = [] } = useQuery<PaymentMethod[]>({
     queryKey: ["payment_methods"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -52,7 +74,7 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
     },
   });
 
-  const { data: cardBrands = [] } = useQuery({
+  const { data: cardBrands = [] } = useQuery<CardBrand[]>({
     queryKey: ["card_brands"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -65,7 +87,7 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
     },
   });
 
-  const { data: cardFees = [] } = useQuery({
+  const { data: cardFees = [] } = useQuery<CardFee[]>({
     queryKey: ["card_fees", selectedBrand],
     queryFn: async () => {
       if (!selectedBrand) return [];
@@ -86,6 +108,16 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
   const canHaveInstallments = selectedPaymentMethod?.has_installments;
 
   const calculateInstallments = () => {
+    if (!selectedMethod) {
+      toast.error("Selecione uma forma de pagamento");
+      return;
+    }
+
+    if (needsCardBrand && !selectedBrand) {
+      toast.error("Selecione a bandeira do cartão");
+      return;
+    }
+
     if (!amount || !dueDate) {
       toast.error("Preencha o valor e a data de vencimento");
       return;
@@ -97,26 +129,38 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
       return;
     }
 
+    const remainingAmount = totalAmount - payments.reduce((sum, p) => sum + p.amount, 0);
+    if (paymentAmount - remainingAmount > 0.01) {
+      toast.error("Valor informado ultrapassa o total restante da venda");
+      return;
+    }
+
     const method = paymentMethods.find((m) => m.id === selectedMethod);
     if (!method) return;
 
-    const installmentDetails = [];
-    let baseDate = new Date(dueDate);
+    const sanitizedInstallments = canHaveInstallments ? Math.max(1, Math.min(24, Math.floor(installments))) : 1;
+    const baseDate = new Date(dueDate);
+    if (Number.isNaN(baseDate.getTime())) {
+      toast.error("Data de vencimento inválida");
+      return;
+    }
 
-    for (let i = 1; i <= installments; i++) {
+    const installmentDetails = [];
+
+    for (let i = 1; i <= sanitizedInstallments; i++) {
       const installmentDate = new Date(baseDate);
       installmentDate.setMonth(baseDate.getMonth() + (i - 1));
 
       let feePercentage = 0;
       let feeAmount = 0;
-      let netAmount = paymentAmount / installments;
+      const installmentValue = paymentAmount / sanitizedInstallments;
+      let netAmount = installmentValue;
 
       // Se tem taxa de cartão, aplicar
       if (needsCardBrand && selectedBrand && method.has_fees) {
         const fee = cardFees.find((f) => f.installments === i);
         if (fee) {
           feePercentage = Number(fee.fee_percentage);
-          const installmentValue = paymentAmount / installments;
           feeAmount = (installmentValue * feePercentage) / 100 + Number(fee.fixed_fee || 0);
           netAmount = installmentValue - feeAmount;
         }
@@ -124,7 +168,7 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
 
       installmentDetails.push({
         installment: i,
-        amount: paymentAmount / installments,
+        amount: installmentValue,
         due_date: installmentDate.toISOString().split("T")[0],
         fee_percentage: feePercentage,
         fee_amount: feeAmount,
@@ -136,14 +180,15 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
       payment_method_id: selectedMethod,
       payment_method_name: method.name,
       card_brand_id: needsCardBrand ? selectedBrand : undefined,
-      installments,
+      installments: sanitizedInstallments,
       amount: paymentAmount,
       due_date: dueDate,
       installment_details: installmentDetails,
     };
 
-    onChange([...payments, newPayment]);
-    
+    const updatedPayments = [...payments, newPayment].sort((a, b) => a.due_date.localeCompare(b.due_date));
+    onChange(updatedPayments);
+
     // Reset form
     setSelectedMethod("");
     setSelectedBrand("");
@@ -156,8 +201,8 @@ export const SalePaymentManager = ({ totalAmount, payments, onChange }: SalePaym
     onChange(payments.filter((_, i) => i !== index));
   };
 
-  const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
-  const remainingAmount = totalAmount - totalPayments;
+  const totalPayments = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments]);
+  const remainingAmount = useMemo(() => totalAmount - totalPayments, [totalAmount, totalPayments]);
 
   return (
     <Card>
