@@ -1,15 +1,28 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Truck, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Truck, Calendar, CheckCircle2, Clock, Hammer } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Entregas = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const { data: deliveries = [] } = useQuery({
     queryKey: ["sale_deliveries"],
     queryFn: async () => {
@@ -21,12 +34,115 @@ const Entregas = () => {
             id,
             sale_number,
             customer_name
+          ),
+          delivery_employee:employees!delivery_employee_id (
+            id,
+            person_id,
+            people (
+              name
+            )
           )
         `)
         .order("scheduled_date", { ascending: true });
       
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: employees = [] } = useQuery({
+    queryKey: ["employees"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("employees")
+        .select(`
+          id,
+          people (
+            name
+          )
+        `)
+        .order("people(name)");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const updateDeliveryMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      const { error } = await supabase
+        .from("sale_deliveries")
+        .update(updates)
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sale_deliveries"] });
+      toast({
+        title: "Entrega atualizada",
+        description: "As informações da entrega foram atualizadas com sucesso.",
+      });
+      setEditDialogOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao atualizar entrega",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createAssemblyMutation = useMutation({
+    mutationFn: async (deliveryId: string) => {
+      // Get delivery and sale items info
+      const { data: delivery, error: deliveryError } = await supabase
+        .from("sale_deliveries")
+        .select(`
+          *,
+          sales (
+            id,
+            sale_items (
+              product_id,
+              product_name
+            )
+          )
+        `)
+        .eq("id", deliveryId)
+        .single();
+      
+      if (deliveryError) throw deliveryError;
+
+      // Create assemblies for each product
+      const assemblies = delivery.sales.sale_items.map((item: any) => ({
+        sale_id: delivery.sale_id,
+        sale_delivery_id: deliveryId,
+        product_id: item.product_id,
+        product_name: item.product_name,
+        status: "pending",
+      }));
+
+      const { error } = await supabase
+        .from("assemblies")
+        .insert(assemblies);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sale_deliveries"] });
+      toast({
+        title: "Montagem criada",
+        description: "As montagens foram criadas com sucesso.",
+      });
+      navigate("/montagens");
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao criar montagem",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -56,13 +172,16 @@ const Entregas = () => {
           <TableHead>Cliente</TableHead>
           <TableHead>Endereço</TableHead>
           <TableHead>Data Agendada</TableHead>
+          <TableHead>Entregador</TableHead>
+          <TableHead>Montagem</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {filteredDeliveries.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
               Nenhuma entrega encontrada
             </TableCell>
           </TableRow>
@@ -84,7 +203,45 @@ const Entregas = () => {
               <TableCell>
                 {format(new Date(delivery.scheduled_date), "dd/MM/yyyy", { locale: ptBR })}
               </TableCell>
+              <TableCell>
+                {delivery.delivery_employee?.people?.name || (
+                  <span className="text-muted-foreground text-sm">Não atribuído</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {delivery.requires_assembly ? (
+                  <Badge variant="secondary">
+                    <Hammer className="h-3 w-3 mr-1" />
+                    Requer
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground text-sm">Não requer</span>
+                )}
+              </TableCell>
               <TableCell>{getStatusBadge(delivery.status)}</TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedDelivery(delivery);
+                      setEditDialogOpen(true);
+                    }}
+                  >
+                    Editar
+                  </Button>
+                  {delivery.requires_assembly && (
+                    <Button
+                      size="sm"
+                      onClick={() => createAssemblyMutation.mutate(delivery.id)}
+                    >
+                      <Hammer className="h-4 w-4 mr-1" />
+                      Criar Montagem
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
             </TableRow>
           ))
         )}
@@ -94,9 +251,15 @@ const Entregas = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Entregas e Montagens</h1>
-        <p className="text-muted-foreground">Gestão de entregas e agendamentos</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Entregas e Montagens</h1>
+          <p className="text-muted-foreground">Gestão de entregas e agendamentos</p>
+        </div>
+        <Button onClick={() => navigate("/montagens")}>
+          <Hammer className="h-4 w-4 mr-2" />
+          Ver Montagens
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -185,6 +348,107 @@ const Entregas = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Entrega</DialogTitle>
+          </DialogHeader>
+          {selectedDelivery && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Entregador</Label>
+                <Select
+                  value={selectedDelivery.delivery_employee_id || ""}
+                  onValueChange={(value) =>
+                    setSelectedDelivery({ ...selectedDelivery, delivery_employee_id: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o entregador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((emp: any) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.people.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Comissão de Entrega (R$)</Label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={selectedDelivery.delivery_commission_amount || 0}
+                  onChange={(e) =>
+                    setSelectedDelivery({
+                      ...selectedDelivery,
+                      delivery_commission_amount: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="requires_assembly"
+                  checked={selectedDelivery.requires_assembly || false}
+                  onCheckedChange={(checked) =>
+                    setSelectedDelivery({ ...selectedDelivery, requires_assembly: checked })
+                  }
+                />
+                <Label htmlFor="requires_assembly">Requer montagem</Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={selectedDelivery.status}
+                  onValueChange={(value) =>
+                    setSelectedDelivery({ ...selectedDelivery, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="scheduled">Agendado</SelectItem>
+                    <SelectItem value="in_transit">Em Trânsito</SelectItem>
+                    <SelectItem value="delivered">Entregue</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() =>
+                    updateDeliveryMutation.mutate({
+                      id: selectedDelivery.id,
+                      updates: {
+                        delivery_employee_id: selectedDelivery.delivery_employee_id,
+                        delivery_commission_amount: selectedDelivery.delivery_commission_amount,
+                        requires_assembly: selectedDelivery.requires_assembly,
+                        status: selectedDelivery.status,
+                      },
+                    })
+                  }
+                >
+                  Salvar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

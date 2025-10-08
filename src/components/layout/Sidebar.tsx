@@ -18,6 +18,7 @@ import {
   Calendar,
   FileText,
   Home,
+  Hammer,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -72,6 +73,10 @@ const menuItems = [
     icon: Truck,
     label: "Entregas",
     path: "/entregas",
+    submenu: [
+      { label: "Entregas", path: "/entregas" },
+      { label: "Montagens", path: "/montagens" },
+    ],
   },
   {
     icon: Wrench,

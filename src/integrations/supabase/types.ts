@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      assemblies: {
+        Row: {
+          assembly_commission_amount: number | null
+          assembly_employee_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          is_showcase: boolean | null
+          notes: string | null
+          product_id: string | null
+          product_name: string
+          sale_delivery_id: string | null
+          sale_id: string | null
+          scheduled_date: string | null
+          started_at: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          assembly_commission_amount?: number | null
+          assembly_employee_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_showcase?: boolean | null
+          notes?: string | null
+          product_id?: string | null
+          product_name: string
+          sale_delivery_id?: string | null
+          sale_id?: string | null
+          scheduled_date?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assembly_commission_amount?: number | null
+          assembly_employee_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_showcase?: boolean | null
+          notes?: string | null
+          product_id?: string | null
+          product_name?: string
+          sale_delivery_id?: string | null
+          sale_id?: string | null
+          scheduled_date?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assemblies_assembly_employee_id_fkey"
+            columns: ["assembly_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assemblies_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assemblies_sale_delivery_id_fkey"
+            columns: ["sale_delivery_id"]
+            isOneToOne: false
+            referencedRelation: "sale_deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assemblies_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assistance_history: {
         Row: {
           assistance_id: string
@@ -1378,9 +1461,12 @@ export type Database = {
           address: string
           city: string | null
           created_at: string | null
+          delivery_commission_amount: number | null
           delivery_date: string | null
+          delivery_employee_id: string | null
           id: string
           notes: string | null
+          requires_assembly: boolean | null
           sale_id: string
           scheduled_date: string
           state: string | null
@@ -1392,9 +1478,12 @@ export type Database = {
           address: string
           city?: string | null
           created_at?: string | null
+          delivery_commission_amount?: number | null
           delivery_date?: string | null
+          delivery_employee_id?: string | null
           id?: string
           notes?: string | null
+          requires_assembly?: boolean | null
           sale_id: string
           scheduled_date: string
           state?: string | null
@@ -1406,9 +1495,12 @@ export type Database = {
           address?: string
           city?: string | null
           created_at?: string | null
+          delivery_commission_amount?: number | null
           delivery_date?: string | null
+          delivery_employee_id?: string | null
           id?: string
           notes?: string | null
+          requires_assembly?: boolean | null
           sale_id?: string
           scheduled_date?: string
           state?: string | null
@@ -1417,6 +1509,13 @@ export type Database = {
           zipcode?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "sale_deliveries_delivery_employee_id_fkey"
+            columns: ["delivery_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sale_deliveries_sale_id_fkey"
             columns: ["sale_id"]

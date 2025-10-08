@@ -17,6 +17,7 @@ import DetalheVenda from "./pages/vendas/DetalheVenda";
 import Estoque from "./pages/estoque/Estoque";
 import ContasReceber from "./pages/financeiro/ContasReceber";
 import Entregas from "./pages/entregas/Entregas";
+import Montagens from "./pages/montagens/Montagens";
 import MainLayout from "./components/layout/MainLayout";
 import Clientes from "./pages/pessoas/Clientes";
 import Funcionarios from "./pages/pessoas/Funcionarios";
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/estoque" element={<ProtectedRoute><MainLayout><Estoque /></MainLayout></ProtectedRoute>} />
             <Route path="/financeiro" element={<ProtectedRoute><MainLayout><Financeiro /></MainLayout></ProtectedRoute>} />
             <Route path="/entregas" element={<ProtectedRoute><MainLayout><Entregas /></MainLayout></ProtectedRoute>} />
+            <Route path="/montagens" element={<ProtectedRoute><MainLayout><Montagens /></MainLayout></ProtectedRoute>} />
             <Route path="/assistencias" element={<ProtectedRoute><MainLayout><Assistencias /></MainLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><MainLayout><Configuracoes /></MainLayout></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
