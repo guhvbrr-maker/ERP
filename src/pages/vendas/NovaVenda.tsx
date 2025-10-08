@@ -6,7 +6,7 @@ import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Search, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +18,8 @@ import { SalePaymentManager, PaymentPlan } from "@/components/vendas/SalePayment
 import { CustomerSelector } from "@/components/vendas/CustomerSelector";
 import { DeliveryPreferences, DeliveryPreferencesData } from "@/components/vendas/DeliveryPreferences";
 import { CepAddressForm } from "@/components/common/CepAddressForm";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 const saleSchema = z.object({
   customer_name: z.string().min(1, "Nome do cliente é obrigatório"),
@@ -25,6 +27,7 @@ const saleSchema = z.object({
   customer_email: z.string().email("Email inválido").optional().or(z.literal("")),
   customer_phone: z.string().optional(),
   sale_date: z.string(),
+  employee_id: z.string().optional(),
   notes: z.string().optional(),
   // Endereço de entrega
   delivery_address: z.string().optional(),
@@ -46,6 +49,8 @@ interface SaleItem {
   unit_price: number;
   discount: number;
   total: number;
+  stock_warning?: string;
+  available_stock?: number;
 }
 
 const NovaVenda = () => {
@@ -65,6 +70,7 @@ const NovaVenda = () => {
       customer_email: "",
       customer_phone: "",
       sale_date: new Date().toISOString().split("T")[0],
+      employee_id: "",
       notes: "",
       delivery_address: "",
       delivery_number: "",
@@ -89,17 +95,69 @@ const NovaVenda = () => {
     },
   });
 
+  const { data: employees = [] } = useQuery({
+    queryKey: ["employees", "active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("employees")
+        .select(`
+          id,
+          people (
+            name
+          )
+        `)
+        .order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
       p.sku.toLowerCase().includes(searchProduct.toLowerCase())
   );
 
-  const addItem = (product: any) => {
+  const addItem = async (product: any) => {
     const existingItem = items.find((i) => i.product_id === product.id);
     if (existingItem) {
       toast.error("Produto já adicionado");
       return;
+    }
+
+    // Check stock availability
+    let stockWarning = undefined;
+    let availableStock = undefined;
+    
+    try {
+      const { data: stockData, error: stockError } = await supabase
+        .from("stocks")
+        .select("available")
+        .eq("product_id", product.id)
+        .maybeSingle();
+      
+      if (!stockError && stockData) {
+        availableStock = Number(stockData.available);
+        if (availableStock === 0) {
+          stockWarning = "ESTOQUE ZERADO";
+          toast.warning(`⚠️ ${product.name}: ESTOQUE ZERADO!`, {
+            duration: 5000,
+          });
+        } else if (availableStock < 1) {
+          stockWarning = "Estoque insuficiente";
+          toast.warning(`⚠️ ${product.name}: Estoque baixo (${availableStock} disponível)`, {
+            duration: 5000,
+          });
+        }
+      } else {
+        stockWarning = "Sem estoque cadastrado";
+        availableStock = 0;
+        toast.warning(`⚠️ ${product.name}: Produto sem estoque cadastrado`, {
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error("Error checking stock:", error);
     }
 
     const newItem: SaleItem = {
@@ -110,6 +168,8 @@ const NovaVenda = () => {
       unit_price: Number(product.selling_price || 0),
       discount: 0,
       total: Number(product.selling_price || 0),
+      stock_warning: stockWarning,
+      available_stock: availableStock,
     };
 
     setItems([...items, newItem]);
@@ -117,12 +177,25 @@ const NovaVenda = () => {
     setSearchProduct("");
   };
 
-  const updateItem = (index: number, field: keyof SaleItem, value: any) => {
+  const updateItem = async (index: number, field: keyof SaleItem, value: any) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     
     const item = newItems[index];
     item.total = item.quantity * item.unit_price - item.discount;
+    
+    // Re-check stock when quantity changes
+    if (field === "quantity" && item.available_stock !== undefined) {
+      if (item.available_stock === 0) {
+        item.stock_warning = "ESTOQUE ZERADO";
+      } else if (item.quantity > item.available_stock) {
+        item.stock_warning = "Quantidade maior que estoque disponível";
+      } else if (item.available_stock < 5) {
+        item.stock_warning = "Estoque baixo";
+      } else {
+        item.stock_warning = undefined;
+      }
+    }
     
     setItems(newItems);
   };
@@ -162,6 +235,7 @@ const NovaVenda = () => {
             customer_email: data.customer_email || null,
             customer_phone: data.customer_phone || null,
             sale_date: data.sale_date,
+            employee_id: data.employee_id || null,
             subtotal,
             discount: totalDiscount,
             total,
@@ -359,7 +433,7 @@ const NovaVenda = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="customer_email"
@@ -387,7 +461,9 @@ const NovaVenda = () => {
                     </FormItem>
                   )}
                 />
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="sale_date"
@@ -397,6 +473,32 @@ const NovaVenda = () => {
                       <FormControl>
                         <Input {...field} type="date" />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="employee_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vendedor</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um vendedor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Nenhum</SelectItem>
+                          {employees.map((employee: any) => (
+                            <SelectItem key={employee.id} value={employee.id}>
+                              {employee.people.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -485,6 +587,23 @@ const NovaVenda = () => {
                 </div>
               )}
 
+              {items.some(item => item.stock_warning) && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Atenção: Problemas de Estoque</AlertTitle>
+                  <AlertDescription>
+                    Alguns produtos possuem estoque baixo ou zerado. A venda será criada, mas o estoque 
+                    só será deduzido quando o status for alterado para "Confirmada" ou "Concluída".
+                    {items.filter(item => item.stock_warning === "ESTOQUE ZERADO").length > 0 && (
+                      <div className="mt-2 font-semibold">
+                        ⚠️ {items.filter(item => item.stock_warning === "ESTOQUE ZERADO").length} produto(s) 
+                        com ESTOQUE ZERADO!
+                      </div>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {items.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   Nenhum produto adicionado
@@ -495,6 +614,7 @@ const NovaVenda = () => {
                     <TableRow>
                       <TableHead>Produto</TableHead>
                       <TableHead>SKU</TableHead>
+                      <TableHead>Estoque</TableHead>
                       <TableHead>Qtd</TableHead>
                       <TableHead>Preço Unit.</TableHead>
                       <TableHead>Desconto</TableHead>
@@ -505,8 +625,30 @@ const NovaVenda = () => {
                   <TableBody>
                     {items.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{item.product_name}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span>{item.product_name}</span>
+                            {item.stock_warning && (
+                              <Badge 
+                                variant={item.stock_warning === "ESTOQUE ZERADO" ? "destructive" : "secondary"}
+                                className="w-fit text-xs"
+                              >
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                {item.stock_warning}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>{item.product_sku}</TableCell>
+                        <TableCell>
+                          <span className={`font-medium ${
+                            (item.available_stock ?? 0) === 0 ? "text-red-500" : 
+                            (item.available_stock ?? 0) < 5 ? "text-yellow-600" : 
+                            "text-green-600"
+                          }`}>
+                            {item.available_stock ?? "N/A"}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <Input
                             type="number"
