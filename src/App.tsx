@@ -34,6 +34,7 @@ import NovaCompra from "./pages/compras/NovaCompra";
 import DetalheCompra from "./pages/compras/DetalheCompra";
 import SugestoesCompra from "./pages/compras/SugestoesCompra";
 import VisualizarCompra from "./pages/compras/VisualizarCompra";
+import Relatorios from "./pages/relatorios/Relatorios";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/entregas" element={<ProtectedRoute><MainLayout><Entregas /></MainLayout></ProtectedRoute>} />
             <Route path="/montagens" element={<ProtectedRoute><MainLayout><Montagens /></MainLayout></ProtectedRoute>} />
             <Route path="/assistencias" element={<ProtectedRoute><MainLayout><Assistencias /></MainLayout></ProtectedRoute>} />
+            <Route path="/relatorios" element={<ProtectedRoute><MainLayout><Relatorios /></MainLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><MainLayout><Configuracoes /></MainLayout></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
