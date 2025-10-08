@@ -7,19 +7,23 @@ interface ProtectedRouteProps {
   requiredRole?: 'admin' | 'manager' | 'salesperson' | 'accountant' | 'warehouse';
 }
 
-export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const { user, loading, hasRole } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
+    if (!loading) {
+      if (!user) {
+        navigate('/login');
+      } else if (requiredRole && !hasRole(requiredRole)) {
+        navigate('/');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, requiredRole, hasRole, navigate]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -30,15 +34,8 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (requiredRole && !hasRole(requiredRole)) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Acesso Negado</h2>
-          <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return <>{children}</>;
-}
+};

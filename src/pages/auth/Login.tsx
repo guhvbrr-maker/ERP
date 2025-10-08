@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { mapDatabaseError } from '@/lib/errorHandling';
+import { mapDatabaseError } from '@/lib/errorHandler';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,28 +25,23 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        toast.error(mapDatabaseError(error));
-        return;
-      }
+    const { error } = await signIn(email, password);
 
+    if (error) {
+      toast.error(mapDatabaseError(error));
+    } else {
       toast.success('Login realizado com sucesso!');
       navigate('/');
-    } catch (error: any) {
-      toast.error(mapDatabaseError(error));
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Entrar</CardTitle>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Entrar</CardTitle>
           <CardDescription>
             Entre com suas credenciais para acessar o sistema
           </CardDescription>
@@ -62,6 +57,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -73,18 +69,19 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Não tem uma conta?{' '}
-              <Link to="/signup" className="text-primary hover:underline">
-                Criar conta
-              </Link>
-            </p>
           </form>
+          <div className="mt-4 text-center text-sm">
+            <span className="text-muted-foreground">Não tem uma conta? </span>
+            <Link to="/signup" className="text-primary hover:underline">
+              Cadastre-se
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

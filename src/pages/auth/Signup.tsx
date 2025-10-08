@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { mapDatabaseError } from '@/lib/errorHandling';
+import { mapDatabaseError } from '@/lib/errorHandler';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -37,28 +37,23 @@ export default function Signup() {
 
     setLoading(true);
 
-    try {
-      const { error } = await signUp(email, password);
-      
-      if (error) {
-        toast.error(mapDatabaseError(error));
-        return;
-      }
+    const { error } = await signUp(email, password);
 
+    if (error) {
+      toast.error(mapDatabaseError(error));
+    } else {
       toast.success('Conta criada com sucesso! Você já pode fazer login.');
       navigate('/login');
-    } catch (error: any) {
-      toast.error(mapDatabaseError(error));
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Criar Conta</CardTitle>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Criar conta</CardTitle>
           <CardDescription>
             Preencha os dados abaixo para criar sua conta
           </CardDescription>
@@ -74,6 +69,7 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -85,6 +81,8 @@ export default function Signup() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
+                minLength={6}
               />
             </div>
             <div className="space-y-2">
@@ -96,18 +94,20 @@ export default function Signup() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={loading}
+                minLength={6}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Criando conta...' : 'Criar conta'}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Já tem uma conta?{' '}
-              <Link to="/login" className="text-primary hover:underline">
-                Fazer login
-              </Link>
-            </p>
           </form>
+          <div className="mt-4 text-center text-sm">
+            <span className="text-muted-foreground">Já tem uma conta? </span>
+            <Link to="/login" className="text-primary hover:underline">
+              Entrar
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
