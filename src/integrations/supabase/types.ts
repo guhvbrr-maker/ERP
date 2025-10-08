@@ -64,6 +64,91 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          birth_date: string | null
+          created_at: string | null
+          credit_limit: number | null
+          customer_since: string | null
+          id: string
+          person_id: string
+          preferred_contact: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string | null
+          credit_limit?: number | null
+          customer_since?: string | null
+          id?: string
+          person_id: string
+          preferred_contact?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string | null
+          credit_limit?: number | null
+          customer_since?: string | null
+          id?: string
+          person_id?: string
+          preferred_contact?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          commission_rate: number | null
+          created_at: string | null
+          department: string | null
+          hire_date: string | null
+          id: string
+          person_id: string
+          position: string | null
+          salary: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          commission_rate?: number | null
+          created_at?: string | null
+          department?: string | null
+          hire_date?: string | null
+          id?: string
+          person_id: string
+          position?: string | null
+          salary?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          commission_rate?: number | null
+          created_at?: string | null
+          department?: string | null
+          hire_date?: string | null
+          id?: string
+          person_id?: string
+          position?: string | null
+          salary?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fabrics: {
         Row: {
           active: boolean | null
@@ -118,6 +203,75 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      people: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          address_complement: string | null
+          address_number: string | null
+          city: string | null
+          contact_source: Database["public"]["Enums"]["contact_source"] | null
+          created_at: string | null
+          created_by: string | null
+          document: string | null
+          email: string | null
+          id: string
+          name: string
+          neighborhood: string | null
+          notes: string | null
+          phone: string | null
+          phone_secondary: string | null
+          state: string | null
+          type: Database["public"]["Enums"]["person_type"]
+          updated_at: string | null
+          zipcode: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
+          city?: string | null
+          contact_source?: Database["public"]["Enums"]["contact_source"] | null
+          created_at?: string | null
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          neighborhood?: string | null
+          notes?: string | null
+          phone?: string | null
+          phone_secondary?: string | null
+          state?: string | null
+          type: Database["public"]["Enums"]["person_type"]
+          updated_at?: string | null
+          zipcode?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          address_complement?: string | null
+          address_number?: string | null
+          city?: string | null
+          contact_source?: Database["public"]["Enums"]["contact_source"] | null
+          created_at?: string | null
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          neighborhood?: string | null
+          notes?: string | null
+          phone?: string | null
+          phone_secondary?: string | null
+          state?: string | null
+          type?: Database["public"]["Enums"]["person_type"]
+          updated_at?: string | null
+          zipcode?: string | null
         }
         Relationships: []
       }
@@ -693,6 +847,47 @@ export type Database = {
           },
         ]
       }
+      suppliers: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          delivery_time_days: number | null
+          id: string
+          payment_terms: string | null
+          person_id: string
+          trade_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          delivery_time_days?: number | null
+          id?: string
+          payment_terms?: string | null
+          person_id: string
+          trade_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          delivery_time_days?: number | null
+          id?: string
+          payment_terms?: string | null
+          person_id?: string
+          trade_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warehouses: {
         Row: {
           active: boolean | null
@@ -740,7 +935,19 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      contact_source:
+        | "instagram"
+        | "facebook"
+        | "fachada"
+        | "radio"
+        | "outdoor"
+        | "google"
+        | "youtube"
+        | "indicacao"
+        | "whatsapp"
+        | "website"
+        | "outros"
+      person_type: "customer" | "employee" | "supplier"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -867,6 +1074,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      contact_source: [
+        "instagram",
+        "facebook",
+        "fachada",
+        "radio",
+        "outdoor",
+        "google",
+        "youtube",
+        "indicacao",
+        "whatsapp",
+        "website",
+        "outros",
+      ],
+      person_type: ["customer", "employee", "supplier"],
+    },
   },
 } as const

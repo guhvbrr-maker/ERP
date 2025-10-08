@@ -16,6 +16,9 @@ import Estoque from "./pages/estoque/Estoque";
 import ContasReceber from "./pages/financeiro/ContasReceber";
 import Entregas from "./pages/entregas/Entregas";
 import MainLayout from "./components/layout/MainLayout";
+import Clientes from "./pages/pessoas/Clientes";
+import Funcionarios from "./pages/pessoas/Funcionarios";
+import Fornecedores from "./pages/pessoas/Fornecedores";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +30,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainLayout><Dashboard /></MainLayout>} />
+          <Route path="/pessoas/clientes" element={<MainLayout><Clientes /></MainLayout>} />
+          <Route path="/pessoas/funcionarios" element={<MainLayout><Funcionarios /></MainLayout>} />
+          <Route path="/pessoas/fornecedores" element={<MainLayout><Fornecedores /></MainLayout>} />
           <Route path="/produtos/categorias" element={<MainLayout><Categorias /></MainLayout>} />
           <Route path="/produtos/catalogo" element={<MainLayout><Catalogo /></MainLayout>} />
           <Route path="/produtos/catalogo/novo" element={<MainLayout><FormularioProduto /></MainLayout>} />
@@ -37,6 +43,7 @@ const App = () => (
           <Route path="/estoque" element={<MainLayout><Estoque /></MainLayout>} />
           <Route path="/financeiro/contas-receber" element={<MainLayout><ContasReceber /></MainLayout>} />
           <Route path="/entregas" element={<MainLayout><Entregas /></MainLayout>} />
+          <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
