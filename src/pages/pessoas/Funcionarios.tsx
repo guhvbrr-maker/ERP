@@ -33,7 +33,26 @@ export default function Funcionarios() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+
+      // Fetch positions for each employee
+      const employeesWithPositions = await Promise.all(
+        data.map(async (employee: any) => {
+          const { data: positions } = await supabase
+            .from("employee_positions")
+            .select(`
+              *,
+              positions(name, code)
+            `)
+            .eq("employee_id", employee.employees[0].id);
+          
+          return {
+            ...employee,
+            positions: positions || [],
+          };
+        })
+      );
+
+      return employeesWithPositions;
     },
   });
 
@@ -155,6 +174,23 @@ export default function Funcionarios() {
                             </div>
                           )}
                         </div>
+
+                        {employee.positions && employee.positions.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-sm font-medium mb-1">Cargos:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {employee.positions.map((ep: any) => (
+                                <Badge
+                                  key={ep.id}
+                                  variant={ep.is_primary ? "default" : "secondary"}
+                                >
+                                  {ep.positions.name}
+                                  {ep.is_primary && " ★"}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {employee.notes && (
                           <p className="text-sm text-muted-foreground italic mt-2">

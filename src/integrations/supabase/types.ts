@@ -64,6 +64,51 @@ export type Database = {
           },
         ]
       }
+      commission_rules: {
+        Row: {
+          category_id: string | null
+          commission_type: string
+          created_at: string | null
+          id: string
+          position_id: string
+          rate: number
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          commission_type: string
+          created_at?: string | null
+          id?: string
+          position_id: string
+          rate?: number
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          commission_type?: string
+          created_at?: string | null
+          id?: string
+          position_id?: string
+          rate?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_rules_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_rules_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           birth_date: string | null
@@ -101,6 +146,51 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: true
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_positions: {
+        Row: {
+          created_at: string | null
+          employee_id: string
+          ended_at: string | null
+          id: string
+          is_primary: boolean | null
+          position_id: string
+          started_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_id: string
+          ended_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          position_id: string
+          started_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_id?: string
+          ended_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          position_id?: string
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_positions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
@@ -272,6 +362,51 @@ export type Database = {
           type?: Database["public"]["Enums"]["person_type"]
           updated_at?: string | null
           zipcode?: string | null
+        }
+        Relationships: []
+      }
+      positions: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          created_at: string | null
+          description: string | null
+          has_assembly_commission: boolean | null
+          has_delivery_commission: boolean | null
+          has_revenue_commission: boolean | null
+          has_sales_commission: boolean | null
+          id: string
+          name: string
+          revenue_commission_rate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          has_assembly_commission?: boolean | null
+          has_delivery_commission?: boolean | null
+          has_revenue_commission?: boolean | null
+          has_sales_commission?: boolean | null
+          id?: string
+          name: string
+          revenue_commission_rate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          has_assembly_commission?: boolean | null
+          has_delivery_commission?: boolean | null
+          has_revenue_commission?: boolean | null
+          has_sales_commission?: boolean | null
+          id?: string
+          name?: string
+          revenue_commission_rate?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }

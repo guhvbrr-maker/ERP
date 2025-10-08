@@ -34,6 +34,7 @@ const menuItems = [
     submenu: [
       { label: "Clientes", path: "/pessoas/clientes" },
       { label: "Funcionários", path: "/pessoas/funcionarios" },
+      { label: "Cargos", path: "/pessoas/cargos" },
       { label: "Fornecedores", path: "/pessoas/fornecedores" },
     ],
   },

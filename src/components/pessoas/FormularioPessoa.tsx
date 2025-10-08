@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2 } from "lucide-react";
 
 interface FormularioPessoaProps {
   type: "customer" | "employee" | "supplier";
@@ -33,6 +36,47 @@ const contactSources = [
 
 export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: FormularioPessoaProps) {
   const [loading, setLoading] = useState(false);
+  const [selectedPositions, setSelectedPositions] = useState<any[]>([]);
+  
+  const { data: positions } = useQuery({
+    queryKey: ["positions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("positions")
+        .select("*")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: type === "employee",
+  });
+
+  const { data: employeePositions } = useQuery({
+    queryKey: ["employee_positions", initialData?.employees?.[0]?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("employee_positions")
+        .select("*, positions(*)")
+        .eq("employee_id", initialData.employees[0].id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: type === "employee" && !!initialData?.employees?.[0]?.id,
+  });
+
+  useEffect(() => {
+    if (employeePositions) {
+      setSelectedPositions(
+        employeePositions.map((ep: any) => ({
+          position_id: ep.position_id,
+          is_primary: ep.is_primary,
+          started_at: ep.started_at,
+        }))
+      );
+    }
+  }, [employeePositions]);
+
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       name: initialData?.name || "",
@@ -140,13 +184,40 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
           commission_rate: data.commission_rate || null,
         };
 
+        let employeeId = initialData?.employees?.[0]?.id;
+
         if (initialData?.employees?.[0]) {
           await supabase
             .from("employees")
             .update(employeeData)
             .eq("id", initialData.employees[0].id);
         } else {
-          await supabase.from("employees").insert([employeeData]);
+          const { data: newEmployee, error: empError } = await supabase
+            .from("employees")
+            .insert([employeeData])
+            .select()
+            .single();
+          if (empError) throw empError;
+          employeeId = newEmployee.id;
+        }
+
+        // Save employee positions
+        if (employeeId && selectedPositions.length > 0) {
+          // Delete existing positions
+          await supabase
+            .from("employee_positions")
+            .delete()
+            .eq("employee_id", employeeId);
+
+          // Insert new positions
+          const positionsToInsert = selectedPositions.map((sp) => ({
+            employee_id: employeeId,
+            position_id: sp.position_id,
+            is_primary: sp.is_primary,
+            started_at: sp.started_at || new Date().toISOString().split("T")[0],
+          }));
+
+          await supabase.from("employee_positions").insert(positionsToInsert);
         }
       } else if (type === "supplier") {
         const supplierData = {
@@ -311,30 +382,125 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
           )}
 
           {type === "employee" && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="hire_date">Data de Admissão</Label>
-                <Input id="hire_date" type="date" {...register("hire_date")} />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="hire_date">Data de Admissão</Label>
+                  <Input id="hire_date" type="date" {...register("hire_date")} />
+                </div>
+
+                <div>
+                  <Label htmlFor="department">Departamento</Label>
+                  <Input id="department" {...register("department")} />
+                </div>
+
+                <div>
+                  <Label htmlFor="salary">Salário</Label>
+                  <Input id="salary" type="number" step="0.01" {...register("salary")} />
+                </div>
+
+                <div>
+                  <Label htmlFor="commission_rate">Taxa Comissão Base (%)</Label>
+                  <Input id="commission_rate" type="number" step="0.01" {...register("commission_rate")} />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="position">Cargo</Label>
-                <Input id="position" {...register("position")} />
-              </div>
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Cargos do Funcionário</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedPositions([
+                        ...selectedPositions,
+                        {
+                          position_id: "",
+                          is_primary: selectedPositions.length === 0,
+                          started_at: new Date().toISOString().split("T")[0],
+                        },
+                      ]);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Adicionar Cargo
+                  </Button>
+                </div>
 
-              <div>
-                <Label htmlFor="department">Departamento</Label>
-                <Input id="department" {...register("department")} />
-              </div>
+                {selectedPositions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Nenhum cargo selecionado. Clique em "Adicionar Cargo" para começar.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedPositions.map((sp, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 p-3 border rounded-lg"
+                      >
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <Select
+                            value={sp.position_id}
+                            onValueChange={(value) => {
+                              const updated = [...selectedPositions];
+                              updated[index].position_id = value;
+                              setSelectedPositions(updated);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o cargo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {positions?.map((pos: any) => (
+                                <SelectItem key={pos.id} value={pos.id}>
+                                  {pos.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
 
-              <div>
-                <Label htmlFor="salary">Salário</Label>
-                <Input id="salary" type="number" step="0.01" {...register("salary")} />
-              </div>
+                          <Input
+                            type="date"
+                            value={sp.started_at}
+                            onChange={(e) => {
+                              const updated = [...selectedPositions];
+                              updated[index].started_at = e.target.value;
+                              setSelectedPositions(updated);
+                            }}
+                          />
+                        </div>
 
-              <div>
-                <Label htmlFor="commission_rate">Taxa de Comissão (%)</Label>
-                <Input id="commission_rate" type="number" step="0.01" {...register("commission_rate")} />
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={sp.is_primary}
+                            onCheckedChange={(checked) => {
+                              const updated = selectedPositions.map((p, i) => ({
+                                ...p,
+                                is_primary: i === index ? !!checked : false,
+                              }));
+                              setSelectedPositions(updated);
+                            }}
+                          />
+                          <Label className="text-sm">Principal</Label>
+                        </div>
+
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setSelectedPositions(
+                              selectedPositions.filter((_, i) => i !== index)
+                            );
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

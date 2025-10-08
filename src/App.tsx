@@ -19,6 +19,7 @@ import MainLayout from "./components/layout/MainLayout";
 import Clientes from "./pages/pessoas/Clientes";
 import Funcionarios from "./pages/pessoas/Funcionarios";
 import Fornecedores from "./pages/pessoas/Fornecedores";
+import Cargos from "./pages/pessoas/Cargos";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/pessoas/clientes" element={<MainLayout><Clientes /></MainLayout>} />
           <Route path="/pessoas/funcionarios" element={<MainLayout><Funcionarios /></MainLayout>} />
           <Route path="/pessoas/fornecedores" element={<MainLayout><Fornecedores /></MainLayout>} />
+          <Route path="/pessoas/cargos" element={<MainLayout><Cargos /></MainLayout>} />
           <Route path="/produtos/categorias" element={<MainLayout><Categorias /></MainLayout>} />
           <Route path="/produtos/catalogo" element={<MainLayout><Catalogo /></MainLayout>} />
           <Route path="/produtos/catalogo/novo" element={<MainLayout><FormularioProduto /></MainLayout>} />
