@@ -1,4 +1,4 @@
-import { Bell, Menu, Search, User, LogOut } from "lucide-react";
+import { Menu, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { NotificationBell } from "./NotificationBell";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -50,12 +51,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
-            3
-          </span>
-        </Button>
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

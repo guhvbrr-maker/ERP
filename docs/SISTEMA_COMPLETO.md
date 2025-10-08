@@ -35,11 +35,21 @@ O ERP Móveis Karina é um sistema completo e integrado para gestão de operaç�
 │  - Inventário              │  - Funcionários                │
 │  - Alertas                 │  - Fornecedores                │
 │  - Múltiplos Depósitos     │  - Cargos/Permissões           │
+├────────────────────────────┼────────────────────────────────┤
+│  🆕 TAREFAS                │  🆕 CHAT INTERNO               │
+│  - Kanban Board            │  - Canais de Departamento      │
+│  - Lista de Tarefas        │  - Canais de Projeto           │
+│  - Atribuição Automática   │  - Mensagens em Tempo Real     │
+│  - Notificações            │  - Histórico Completo          │
 ├────────────────────────────┴────────────────────────────────┤
 │                 BUSINESS INTELLIGENCE                        │
 │  - Dashboard Analytics     - Relatórios Gerenciais           │
 │  - KPIs em Tempo Real      - Análises Preditivas            │
 │  - Gráficos Interativos    - Exportações                     │
+│                                                               │
+│         🔔 SISTEMA DE NOTIFICAÇÕES INTELIGENTE               │
+│  - Notificações em Tempo Real  - Alertas de Vencimento       │
+│  - Centro de Notificações      - Priorização Automática      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -388,6 +398,169 @@ Concluído → Feedback do cliente
 - Taxa de resposta
 - Principais reclamações
 - Ações corretivas
+
+### 11. MÓDULO DE GERENCIAMENTO DE TAREFAS 🆕
+
+#### Funcionalidades Principais
+- ✅ **Kanban Board Visual**: Visualização em quadros com drag & drop
+- ✅ **Lista Detalhada**: Visualização tabular completa
+- ✅ **Atribuição Inteligente**: Atribua tarefas a funcionários específicos
+- ✅ **Priorização**: 4 níveis de prioridade (Baixa, Normal, Alta, Urgente)
+- ✅ **Status Múltiplos**: Pendente, Em Andamento, Bloqueado, Em Revisão, Concluído, Cancelado
+- ✅ **Departamentos**: Organize tarefas por setor
+- ✅ **Prazos e Alertas**: Notificações automáticas de vencimento
+- ✅ **Vinculação com Módulos**: Conecte tarefas a vendas, produção, entregas, etc.
+
+#### Workflow de Tarefas
+```
+Criação → Atribuição → Notificação
+  ↓
+Pendente → Em Andamento → Em Revisão
+  ↓                ↓
+Bloqueado      Concluído
+  ↓
+Resolvido → Concluído
+```
+
+#### Notificações Automáticas
+- 🔔 **Nova Atribuição**: Notifica imediatamente ao atribuir tarefa
+- ⏰ **Vencimento Próximo**: Alerta 24h antes do prazo
+- 🚨 **Tarefa Vencida**: Notificação de tarefas atrasadas
+- ✅ **Conclusão**: Notifica criador quando tarefa é concluída
+
+#### Filtros Disponíveis
+- Status da tarefa
+- Prioridade
+- Departamento
+- Funcionário atribuído
+- Data de vencimento
+- Tags personalizadas
+
+#### Indicadores Visuais
+- 🔴 **Urgente**: Badge vermelho
+- 🟠 **Alta**: Badge laranja
+- 🔵 **Normal**: Badge azul
+- ⚫ **Baixa**: Badge cinza
+- ⚠️ **Vencida**: Borda vermelha + ícone de alerta
+
+#### Integração com Outros Módulos
+```
+Venda → Tarefa de Entrega
+Produção → Tarefa de Montagem
+Assistência → Tarefa de Atendimento
+Compra → Tarefa de Recebimento
+```
+
+### 12. SISTEMA DE CHAT INTERNO 🆕
+
+#### Funcionalidades Principais
+- ✅ **Canais Organizados**: Por departamento, projeto ou equipe
+- ✅ **Mensagens em Tempo Real**: Comunicação instantânea
+- ✅ **Histórico Completo**: Todas as mensagens salvas
+- ✅ **Canais Públicos e Privados**: Controle de acesso
+- ✅ **Interface Intuitiva**: Design similar a apps modernos de chat
+- ✅ **Indicadores Visuais**: Diferenciação clara de mensagens
+
+#### Tipos de Canais
+- 🌐 **Canal Geral**: Para toda a empresa
+- 🏢 **Canais de Departamento**: Específicos por setor
+- 👥 **Canais de Equipe/Projeto**: Para grupos de trabalho
+- 🔒 **Canais Privados**: Acesso restrito
+
+#### Canais Padrão Criados
+- # Geral (público)
+- # Vendas (departamento)
+- # Produção (departamento)
+- # Entrega (departamento)
+- # Financeiro (departamento)
+- # Assistência Técnica (departamento)
+- # Compras (departamento)
+- # Administração (departamento)
+
+#### Interface do Chat
+```
+┌─────────────────┬──────────────────────────────────┐
+│  Canais         │  # Nome do Canal                 │
+│                 │  Descrição do canal              │
+│  # Geral        ├──────────────────────────────────┤
+│  # Vendas       │                                  │
+│  # Produção     │  Mensagens                       │
+│  # Entrega      │  [Histórico completo]            │
+│  # Financeiro   │                                  │
+│  🔒 Privado     │                                  │
+│                 │                                  │
+│  [+ Novo]       ├──────────────────────────────────┤
+│                 │  [Digite sua mensagem...] [📤]   │
+└─────────────────┴──────────────────────────────────┘
+```
+
+#### Recursos de Mensagens
+- Identificação do remetente
+- Timestamp de envio
+- Suas mensagens destacadas
+- Auto-scroll para mensagens novas
+- Enter para enviar, Shift+Enter para quebra de linha
+
+#### Casos de Uso
+- Coordenação rápida entre equipes
+- Esclarecimento de dúvidas
+- Compartilhamento de informações
+- Atualizações de status
+- Brainstorming e discussões
+- Resolução de problemas
+
+### 13. SISTEMA DE NOTIFICAÇÕES INTELIGENTE 🆕
+
+#### Funcionalidades Principais
+- ✅ **Centro de Notificações**: Ícone de sino no cabeçalho
+- ✅ **Contador de Não Lidas**: Badge com número de notificações
+- ✅ **Categorização**: Por tipo de notificação
+- ✅ **Ações Rápidas**: Navegue direto ao item relacionado
+- ✅ **Marcar como Lida**: Individual ou todas de uma vez
+- ✅ **Atualização Automática**: Refresh a cada 30 segundos
+
+#### Tipos de Notificações
+- 📋 **Tarefa Atribuída**: Nova tarefa designada a você
+- ⏰ **Tarefa Vencendo**: Prazo se aproximando (24h)
+- 🚨 **Tarefa Vencida**: Tarefa passou do prazo
+- ✅ **Tarefa Concluída**: Tarefa que você criou foi concluída
+- 📝 **Comentário em Tarefa**: Nova discussão
+- 💬 **Mensagem no Chat**: Nova mensagem em canal
+- 🛒 **Status de Venda**: Mudança em venda
+- 📦 **Compra Aprovada**: Pedido de compra aprovado
+- 🚚 **Entrega Agendada**: Nova entrega programada
+- 🔧 **Assistência Atribuída**: Novo chamado técnico
+- 🔔 **Sistema**: Avisos gerais do sistema
+
+#### Interface de Notificações
+```
+┌─────────────────────────────────────────┐
+│  Notificações              [Marcar todas]│
+├─────────────────────────────────────────┤
+│  📋 Nova tarefa atribuída      [•]       │
+│     "Preparar entrega #123"              │
+│     há 5 minutos                         │
+├─────────────────────────────────────────┤
+│  ⏰ Tarefa vencendo em breve             │
+│     "Revisar orçamento XYZ"              │
+│     há 1 hora                            │
+├─────────────────────────────────────────┤
+│  💬 Nova mensagem                        │
+│     Canal: # Vendas                      │
+│     há 2 horas                           │
+└─────────────────────────────────────────┘
+```
+
+#### Indicadores
+- 🔴 **Ponto vermelho**: Notificação não lida
+- 🔵 **Badge numérico**: Quantidade de não lidas
+- ✅ **Sem indicador**: Notificação já lida
+
+#### Automações
+- Notificações criadas automaticamente por triggers no banco
+- Checagem periódica de prazos vencendo
+- Alertas de SLA próximos ao vencimento
+- Notificações de mudanças de status
 
 ## 🔄 Integrações Entre Módulos
 

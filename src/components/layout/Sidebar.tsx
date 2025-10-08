@@ -19,6 +19,8 @@ import {
   FileText,
   Home,
   Hammer,
+  CheckSquare,
+  MessageSquare,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -102,6 +104,16 @@ const menuItems = [
     icon: BarChart3,
     label: "Relatórios",
     path: "/relatorios",
+  },
+  {
+    icon: CheckSquare,
+    label: "Tarefas",
+    path: "/tarefas",
+  },
+  {
+    icon: MessageSquare,
+    label: "Chat",
+    path: "/chat",
   },
   {
     icon: Settings,
