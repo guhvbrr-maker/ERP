@@ -59,9 +59,8 @@ const menuItems = [
     label: "Compras",
     path: "/compras",
     submenu: [
-      { label: "Pedidos", path: "/compras/pedidos" },
+      { label: "Pedidos", path: "/compras" },
       { label: "Sugestões", path: "/compras/sugestoes" },
-      { label: "Recebimento", path: "/compras/recebimento" },
     ],
   },
   {

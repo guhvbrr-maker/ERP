@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -146,6 +147,21 @@ export default function FormularioProduto() {
       const { data, error } = await supabase
         .from("fabrics")
         .select("id, name")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Carregar fornecedores
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ["suppliers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("people")
+        .select("id, name")
+        .eq("type", "supplier")
         .eq("active", true)
         .order("name");
       if (error) throw error;
@@ -935,10 +951,21 @@ export default function FormularioProduto() {
                     name="manufacturer"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Fabricante</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Nome do fabricante" />
-                        </FormControl>
+                        <FormLabel>Fornecedor/Fabricante</FormLabel>
+                        <Select value={field.value || ""} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um fornecedor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {suppliers.map((supplier: any) => (
+                              <SelectItem key={supplier.id} value={supplier.name}>
+                                {supplier.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

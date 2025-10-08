@@ -28,6 +28,11 @@ import Assistencias from "./pages/assistencias/Assistencias";
 import Financeiro from "./pages/financeiro/Financeiro";
 import Materiais from "./pages/produtos/Materiais";
 import Tecidos from "./pages/produtos/Tecidos";
+import Compras from "./pages/compras/Compras";
+import NovaCompra from "./pages/compras/NovaCompra";
+import DetalheCompra from "./pages/compras/DetalheCompra";
+import SugestoesCompra from "./pages/compras/SugestoesCompra";
+import VisualizarCompra from "./pages/compras/VisualizarCompra";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +60,11 @@ const App = () => (
             <Route path="/vendas" element={<ProtectedRoute><MainLayout><Vendas /></MainLayout></ProtectedRoute>} />
             <Route path="/vendas/nova" element={<ProtectedRoute><MainLayout><NovaVenda /></MainLayout></ProtectedRoute>} />
             <Route path="/vendas/:id" element={<ProtectedRoute><MainLayout><DetalheVenda /></MainLayout></ProtectedRoute>} />
+              <Route path="/compras" element={<ProtectedRoute><MainLayout><Compras /></MainLayout></ProtectedRoute>} />
+              <Route path="/compras/nova" element={<ProtectedRoute><MainLayout><NovaCompra /></MainLayout></ProtectedRoute>} />
+              <Route path="/compras/:id" element={<ProtectedRoute><MainLayout><DetalheCompra /></MainLayout></ProtectedRoute>} />
+              <Route path="/compras/sugestoes" element={<ProtectedRoute><MainLayout><SugestoesCompra /></MainLayout></ProtectedRoute>} />
+              <Route path="/compras/visualizar/:token" element={<VisualizarCompra />} />
             <Route path="/estoque" element={<ProtectedRoute><MainLayout><Estoque /></MainLayout></ProtectedRoute>} />
             <Route path="/financeiro" element={<ProtectedRoute><MainLayout><Financeiro /></MainLayout></ProtectedRoute>} />
             <Route path="/entregas" element={<ProtectedRoute><MainLayout><Entregas /></MainLayout></ProtectedRoute>} />
