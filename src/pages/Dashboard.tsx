@@ -14,6 +14,7 @@ import {
   ClipboardCheck,
   BarChart3,
 } from "lucide-react";
+import { TasksWidget } from "@/components/dashboard/TasksWidget";
 import { format, startOfMonth, endOfMonth, subMonths, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -352,7 +353,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -436,6 +437,8 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        <TasksWidget />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
