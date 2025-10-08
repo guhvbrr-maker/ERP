@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Briefcase, TrendingUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PositionRolesManager } from "@/components/pessoas/PositionRolesManager";
 
 interface PositionForm {
   name: string;
@@ -284,69 +285,80 @@ export default function Cargos() {
               <Textarea id="description" {...register("description")} />
             </div>
 
-            <div className="space-y-3 border p-4 rounded-lg">
-              <h3 className="font-medium">Tipos de Comissão</h3>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="has_sales_commission">Comissão de Vendas</Label>
-                <Switch
-                  id="has_sales_commission"
-                  checked={watch("has_sales_commission")}
-                  onCheckedChange={(checked) =>
-                    setValue("has_sales_commission", checked)
-                  }
-                />
-              </div>
+            <Tabs defaultValue="comissoes" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="comissoes">Comissões</TabsTrigger>
+                <TabsTrigger value="permissoes">Permissões do Sistema</TabsTrigger>
+              </TabsList>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="has_assembly_commission">Comissão de Montagem</Label>
-                <Switch
-                  id="has_assembly_commission"
-                  checked={watch("has_assembly_commission")}
-                  onCheckedChange={(checked) =>
-                    setValue("has_assembly_commission", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="has_delivery_commission">Comissão de Entrega</Label>
-                <Switch
-                  id="has_delivery_commission"
-                  checked={watch("has_delivery_commission")}
-                  onCheckedChange={(checked) =>
-                    setValue("has_delivery_commission", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="has_revenue_commission">
-                  Comissão sobre Faturamento Total
-                </Label>
-                <Switch
-                  id="has_revenue_commission"
-                  checked={watch("has_revenue_commission")}
-                  onCheckedChange={(checked) =>
-                    setValue("has_revenue_commission", checked)
-                  }
-                />
-              </div>
-
-              {watch("has_revenue_commission") && (
-                <div className="space-y-2 ml-4">
-                  <Label htmlFor="revenue_commission_rate">
-                    Taxa de Comissão (%)
-                  </Label>
-                  <Input
-                    id="revenue_commission_rate"
-                    type="number"
-                    step="0.01"
-                    {...register("revenue_commission_rate")}
+              <TabsContent value="comissoes" className="space-y-3 border p-4 rounded-lg mt-4">
+                <h3 className="font-medium">Tipos de Comissão</h3>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="has_sales_commission">Comissão de Vendas</Label>
+                  <Switch
+                    id="has_sales_commission"
+                    checked={watch("has_sales_commission")}
+                    onCheckedChange={(checked) =>
+                      setValue("has_sales_commission", checked)
+                    }
                   />
                 </div>
-              )}
-            </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="has_assembly_commission">Comissão de Montagem</Label>
+                  <Switch
+                    id="has_assembly_commission"
+                    checked={watch("has_assembly_commission")}
+                    onCheckedChange={(checked) =>
+                      setValue("has_assembly_commission", checked)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="has_delivery_commission">Comissão de Entrega</Label>
+                  <Switch
+                    id="has_delivery_commission"
+                    checked={watch("has_delivery_commission")}
+                    onCheckedChange={(checked) =>
+                      setValue("has_delivery_commission", checked)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="has_revenue_commission">
+                    Comissão sobre Faturamento Total
+                  </Label>
+                  <Switch
+                    id="has_revenue_commission"
+                    checked={watch("has_revenue_commission")}
+                    onCheckedChange={(checked) =>
+                      setValue("has_revenue_commission", checked)
+                    }
+                  />
+                </div>
+
+                {watch("has_revenue_commission") && (
+                  <div className="space-y-2 ml-4">
+                    <Label htmlFor="revenue_commission_rate">
+                      Taxa de Comissão (%)
+                    </Label>
+                    <Input
+                      id="revenue_commission_rate"
+                      type="number"
+                      step="0.01"
+                      {...register("revenue_commission_rate")}
+                    />
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="permissoes" className="mt-4">
+                <PositionRolesManager positionId={editingPosition?.id} />
+              </TabsContent>
+            </Tabs>
 
             <div className="flex items-center justify-between">
               <Label htmlFor="active">Ativo</Label>

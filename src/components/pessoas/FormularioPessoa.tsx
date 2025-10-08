@@ -104,6 +104,8 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
       department: initialData?.employees?.[0]?.department || "",
       salary: initialData?.employees?.[0]?.salary || "",
       commission_rate: initialData?.employees?.[0]?.commission_rate || "",
+      login_email: initialData?.email || "",
+      login_password: "",
       // Supplier specific
       company_name: initialData?.suppliers?.[0]?.company_name || "",
       trade_name: initialData?.suppliers?.[0]?.trade_name || "",
@@ -175,6 +177,30 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
           await supabase.from("customers").insert([customerData]);
         }
       } else if (type === "employee") {
+        let userId = initialData?.employees?.[0]?.user_id;
+
+        // Create user account if email and password provided
+        if (data.login_email && data.login_password && !userId) {
+          const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+            email: data.login_email,
+            password: data.login_password,
+            email_confirm: true,
+          });
+
+          if (authError) {
+            // If admin API fails, try regular signup
+            const { data: signupData, error: signupError } = await supabase.auth.signUp({
+              email: data.login_email,
+              password: data.login_password,
+            });
+            
+            if (signupError) throw new Error("Erro ao criar login: " + signupError.message);
+            userId = signupData.user?.id;
+          } else {
+            userId = authData.user?.id;
+          }
+        }
+
         const employeeData = {
           person_id: personId,
           hire_date: data.hire_date || null,
@@ -182,6 +208,7 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
           department: data.department,
           salary: data.salary || null,
           commission_rate: data.commission_rate || null,
+          user_id: userId,
         };
 
         let employeeId = initialData?.employees?.[0]?.id;
@@ -383,6 +410,39 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
 
           {type === "employee" && (
             <div className="space-y-4">
+              <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
+                <h3 className="font-medium text-sm">Acesso ao Sistema</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="login_email">Email para Login</Label>
+                    <Input 
+                      id="login_email" 
+                      type="email" 
+                      {...register("login_email")}
+                      placeholder="email@exemplo.com"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {initialData?.employees?.[0]?.user_id 
+                        ? "Usuário já possui acesso ao sistema" 
+                        : "Criar login para acesso ao sistema"}
+                    </p>
+                  </div>
+
+                  {!initialData?.employees?.[0]?.user_id && (
+                    <div>
+                      <Label htmlFor="login_password">Senha</Label>
+                      <Input 
+                        id="login_password" 
+                        type="password" 
+                        {...register("login_password")}
+                        placeholder="Mínimo 6 caracteres"
+                        minLength={6}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="hire_date">Data de Admissão</Label>

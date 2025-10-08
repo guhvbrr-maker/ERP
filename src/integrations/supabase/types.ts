@@ -206,6 +206,7 @@ export type Database = {
           position: string | null
           salary: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           commission_rate?: number | null
@@ -217,6 +218,7 @@ export type Database = {
           position?: string | null
           salary?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           commission_rate?: number | null
@@ -228,6 +230,7 @@ export type Database = {
           position?: string | null
           salary?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -364,6 +367,35 @@ export type Database = {
           zipcode?: string | null
         }
         Relationships: []
+      }
+      position_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          position_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          position_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          position_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_roles_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       positions: {
         Row: {
