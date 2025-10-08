@@ -129,6 +129,7 @@ export const DeliveryPreferences = ({ value, onChange }: DeliveryPreferencesProp
             ...day,
             enabled,
             timeSlots: enabled ? [{ period: "morning" as const }] : [],
+        main
           }
         : day
     );

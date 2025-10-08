@@ -53,30 +53,27 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
     enabled: type === "employee",
   });
 
-  const { data: employeePositions } = useQuery({
-    queryKey: ["employee_positions", initialData?.employees?.[0]?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("employee_positions")
-        .select("*, positions(*)")
-        .eq("employee_id", initialData.employees[0].id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: type === "employee" && !!initialData?.employees?.[0]?.id,
-  });
-
   useEffect(() => {
-    if (employeePositions) {
+    if (type !== "employee") {
+      setSelectedPositions([]);
+      return;
+    }
+
+    const employeeRecord = initialData?.employees?.[0];
+    const positions = employeeRecord?.employee_positions || initialData?.positions;
+
+    if (positions && positions.length > 0) {
       setSelectedPositions(
-        employeePositions.map((ep: any) => ({
+        positions.map((ep: any) => ({
           position_id: ep.position_id,
           is_primary: ep.is_primary,
           started_at: ep.started_at,
         }))
       );
+    } else {
+      setSelectedPositions([]);
     }
-  }, [employeePositions]);
+  }, [type, initialData]);
 
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
@@ -230,22 +227,29 @@ export function FormularioPessoa({ type, initialData, onSuccess, onCancel }: For
         }
 
         // Save employee positions
-        if (employeeId && selectedPositions.length > 0) {
-          // Delete existing positions
+        if (employeeId) {
           await supabase
             .from("employee_positions")
             .delete()
             .eq("employee_id", employeeId);
 
-          // Insert new positions
-          const positionsToInsert = selectedPositions.map((sp) => ({
-            employee_id: employeeId,
-            position_id: sp.position_id,
-            is_primary: sp.is_primary,
-            started_at: sp.started_at || new Date().toISOString().split("T")[0],
-          }));
+          if (selectedPositions.length > 0) {
+            const positionsToInsert = selectedPositions
+              .filter((sp) => sp.position_id)
+              .map((sp) => ({
+                employee_id: employeeId,
+                position_id: sp.position_id,
+                is_primary: sp.is_primary,
+                started_at:
+                  sp.started_at || new Date().toISOString().split("T")[0],
+              }));
 
-          await supabase.from("employee_positions").insert(positionsToInsert);
+            if (positionsToInsert.length > 0) {
+              await supabase
+                .from("employee_positions")
+                .insert(positionsToInsert);
+            }
+          }
         }
       } else if (type === "supplier") {
         const supplierData = {

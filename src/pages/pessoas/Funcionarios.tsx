@@ -4,9 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Search, Plus, Phone, Mail, Briefcase, Edit, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { FormularioPessoa } from "@/components/pessoas/FormularioPessoa";
 import { toast } from "sonner";
 
@@ -22,37 +28,41 @@ export default function Funcionarios() {
         .from("people")
         .select(`
           *,
-          employees (*)
+          employees (
+            *,
+            employee_positions (
+              id,
+              position_id,
+              is_primary,
+              started_at,
+              positions (
+                id,
+                name,
+                code
+              )
+            )
+          )
         `)
         .eq("type", "employee")
         .order("name");
 
       if (search) {
-        query = query.or(`name.ilike.%${search}%,document.ilike.%${search}%,phone.ilike.%${search}%`);
+        query = query.or(
+          `name.ilike.%${search}%,document.ilike.%${search}%,phone.ilike.%${search}%`
+        );
       }
 
       const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch positions for each employee
-      const employeesWithPositions = await Promise.all(
-        data.map(async (employee: any) => {
-          const { data: positions } = await supabase
-            .from("employee_positions")
-            .select(`
-              *,
-              positions(name, code)
-            `)
-            .eq("employee_id", employee.employees[0].id);
-          
-          return {
-            ...employee,
-            positions: positions || [],
-          };
-        })
-      );
-
-      return employeesWithPositions;
+      return (data || []).map((employee) => {
+        const employeeRecord = employee.employees?.[0];
+        return {
+          ...employee,
+          employeeRecord,
+          positions: employeeRecord?.employee_positions || [],
+        };
+      });
     },
   });
 
@@ -140,14 +150,14 @@ export default function Funcionarios() {
                           {!employee.active && (
                             <Badge variant="secondary">Inativo</Badge>
                           )}
-                          {employee.employees?.[0]?.position && (
+                          {employee.employeeRecord?.position && (
                             <Badge variant="outline">
                               <Briefcase className="h-3 w-3 mr-1" />
-                              {employee.employees[0].position}
+                              {employee.employeeRecord.position}
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground">
                           {employee.document && (
                             <div className="flex items-center gap-2">
@@ -167,10 +177,10 @@ export default function Funcionarios() {
                               <span>{employee.email}</span>
                             </div>
                           )}
-                          {employee.employees?.[0]?.department && (
+                          {employee.employeeRecord?.department && (
                             <div className="flex items-center gap-2">
                               <span className="font-medium">Depto:</span>
-                              <span>{employee.employees[0].department}</span>
+                              <span>{employee.employeeRecord.department}</span>
                             </div>
                           )}
                         </div>
@@ -184,7 +194,7 @@ export default function Funcionarios() {
                                   key={ep.id}
                                   variant={ep.is_primary ? "default" : "secondary"}
                                 >
-                                  {ep.positions.name}
+                                  {ep.positions?.name}
                                   {ep.is_primary && " ★"}
                                 </Badge>
                               ))}
