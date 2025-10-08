@@ -102,12 +102,6 @@ const menuItems = [
     icon: BarChart3,
     label: "Relatórios",
     path: "/relatorios",
-    submenu: [
-      { label: "Vendas", path: "/relatorios/vendas" },
-      { label: "Estoque", path: "/relatorios/estoque" },
-      { label: "Financeiro", path: "/relatorios/financeiro" },
-      { label: "Comissões", path: "/relatorios/comissoes" },
-    ],
   },
   {
     icon: Settings,

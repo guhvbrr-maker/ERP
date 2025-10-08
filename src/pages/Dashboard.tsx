@@ -10,10 +10,14 @@ import {
   TrendingDown,
   Users,
   AlertTriangle,
+  Wrench,
+  ClipboardCheck,
+  BarChart3,
 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth, subMonths, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -164,6 +168,71 @@ const Dashboard = () => {
       const newThisMonth = data.filter(c => c.created_at >= startOfThisMonth).length;
 
       return { total: data.length, newThisMonth };
+    },
+  });
+
+  // Assistances data
+  const { data: assistancesData } = useQuery({
+    queryKey: ["assistances-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("assistances")
+        .select("id, status, created_at, scheduled_date");
+
+      if (error) throw error;
+
+      const open = data.filter(a => a.status === "open").length;
+      const inProgress = data.filter(a => a.status === "in_progress").length;
+      const scheduled = data.filter(a => a.status === "scheduled").length;
+
+      return { total: data.length, open, inProgress, scheduled };
+    },
+  });
+
+  // Purchases data
+  const { data: purchasesData } = useQuery({
+    queryKey: ["purchases-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("purchases")
+        .select("id, status, total");
+
+      if (error) throw error;
+
+      const pending = data.filter(p => p.status === "draft" || p.status === "sent").length;
+      const confirmed = data.filter(p => p.status === "confirmed").length;
+      const total = data.reduce((sum, p) => sum + Number(p.total || 0), 0);
+
+      return { total: data.length, pending, confirmed, totalValue: total };
+    },
+  });
+
+  // Sales trend (last 7 days)
+  const { data: salesTrend } = useQuery({
+    queryKey: ["sales-trend"],
+    queryFn: async () => {
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dayStr = date.toISOString().split("T")[0];
+        
+        const { data, error } = await supabase
+          .from("sales")
+          .select("total")
+          .gte("sale_date", dayStr)
+          .lt("sale_date", new Date(date.getTime() + 86400000).toISOString().split("T")[0])
+          .neq("status", "cancelled");
+
+        if (error) throw error;
+
+        const total = data.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
+        days.push({
+          day: format(date, "dd/MM", { locale: ptBR }),
+          vendas: total
+        });
+      }
+      return days;
     },
   });
 
@@ -430,6 +499,109 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Additional Metrics Row */}
+      <div className="grid gap-6 md:grid-cols-4">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/assistencias")}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Wrench className="h-4 w-4" />
+              Assistências
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Abertas</span>
+                <span className="text-lg font-bold text-warning">{assistancesData?.open || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Em andamento</span>
+                <span className="text-lg font-bold text-primary">{assistancesData?.inProgress || 0}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/compras")}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Compras
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Pendentes</span>
+                <span className="text-lg font-bold text-warning">{purchasesData?.pending || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Confirmadas</span>
+                <span className="text-lg font-bold text-success">{purchasesData?.confirmed || 0}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/montagens")}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Montagens
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-foreground">
+                {/* This would need a query - using placeholder */}
+                -
+              </p>
+              <p className="text-sm text-muted-foreground">Agendadas</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/relatorios")}>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Relatórios
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <p className="text-lg font-medium text-primary">Ver Analytics</p>
+              <p className="text-sm text-muted-foreground mt-1">Business Intelligence</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Sales Trend Chart */}
+      {salesTrend && salesTrend.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Tendência de Vendas (Últimos 7 dias)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={salesTrend}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value: number) => 
+                    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value)
+                  }
+                />
+                <Legend />
+                <Line type="monotone" dataKey="vendas" stroke="#8884d8" strokeWidth={2} name="Vendas" />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
