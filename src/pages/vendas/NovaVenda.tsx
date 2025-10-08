@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SalePaymentManager, PaymentPlan } from "@/components/vendas/SalePaymentManager";
 
 const saleSchema = z.object({
   customer_name: z.string().min(1, "Nome do cliente é obrigatório"),
@@ -42,6 +43,7 @@ const NovaVenda = () => {
   const [items, setItems] = useState<SaleItem[]>([]);
   const [searchProduct, setSearchProduct] = useState("");
   const [showProductSearch, setShowProductSearch] = useState(false);
+  const [payments, setPayments] = useState<PaymentPlan[]>([]);
 
   const form = useForm<SaleForm>({
     resolver: zodResolver(saleSchema),
@@ -120,6 +122,12 @@ const NovaVenda = () => {
         throw new Error("Adicione pelo menos um produto");
       }
 
+      // Validar que o total de pagamentos é igual ao total da venda
+      const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+      if (Math.abs(totalPayments - total) > 0.01 && payments.length > 0) {
+        throw new Error(`Total de pagamentos (${totalPayments.toFixed(2)}) difere do total da venda (${total.toFixed(2)})`);
+      }
+
       // Gerar número da venda
       const { data: saleNumberData } = await supabase.rpc("generate_sale_number");
       const saleNumber = saleNumberData || `VND${Date.now()}`;
@@ -140,7 +148,7 @@ const NovaVenda = () => {
             total,
             notes: data.notes || null,
             status: "pending",
-            payment_status: "pending",
+            payment_status: payments.length > 0 ? "pending" : "pending",
             delivery_status: "pending",
           },
         ])
@@ -166,6 +174,61 @@ const NovaVenda = () => {
         .insert(saleItems);
 
       if (itemsError) throw itemsError;
+
+      // Criar contas a receber para cada pagamento
+      if (payments.length > 0) {
+        const financialAccounts = [];
+        
+        for (const payment of payments) {
+          if (payment.installment_details && payment.installment_details.length > 0) {
+            // Criar uma conta para cada parcela
+            for (const installment of payment.installment_details) {
+              financialAccounts.push({
+                account_type: "receivable",
+                description: `${saleNumber} - ${payment.payment_method_name} - ${installment.installment}/${payment.installments}`,
+                amount: installment.amount,
+                due_date: installment.due_date,
+                status: "pending",
+                payment_method_id: payment.payment_method_id,
+                card_brand_id: payment.card_brand_id || null,
+                installment_number: installment.installment,
+                installments: payment.installments,
+                fee_percentage: installment.fee_percentage,
+                fee_amount: installment.fee_amount,
+                net_amount: installment.net_amount,
+                sale_id: sale.id,
+                paid_amount: 0,
+                remaining_amount: installment.amount,
+              });
+            }
+          } else {
+            // Pagamento único
+            financialAccounts.push({
+              account_type: "receivable",
+              description: `${saleNumber} - ${payment.payment_method_name}`,
+              amount: payment.amount,
+              due_date: payment.due_date,
+              status: "pending",
+              payment_method_id: payment.payment_method_id,
+              card_brand_id: payment.card_brand_id || null,
+              installments: 1,
+              installment_number: 1,
+              fee_percentage: 0,
+              fee_amount: 0,
+              net_amount: payment.amount,
+              sale_id: sale.id,
+              paid_amount: 0,
+              remaining_amount: payment.amount,
+            });
+          }
+        }
+
+        const { error: accountsError } = await supabase
+          .from("financial_accounts")
+          .insert(financialAccounts);
+
+        if (accountsError) throw accountsError;
+      }
 
       return sale.id;
     },
@@ -443,6 +506,12 @@ const NovaVenda = () => {
               </div>
             </CardContent>
           </Card>
+
+          <SalePaymentManager
+            totalAmount={total}
+            payments={payments}
+            onChange={setPayments}
+          />
 
           <Card>
             <CardHeader>

@@ -73,11 +73,15 @@ const DetalheVenda = () => {
   });
 
   const { data: payments = [] } = useQuery({
-    queryKey: ["sale_payments", id],
+    queryKey: ["financial_accounts", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("sale_payments")
-        .select("*")
+        .from("financial_accounts")
+        .select(`
+          *,
+          payment_methods(name),
+          card_brands(name)
+        `)
         .eq("sale_id", id)
         .order("due_date");
 
@@ -365,27 +369,40 @@ const DetalheVenda = () => {
         <TabsContent value="pagamentos">
           <Card>
             <CardHeader>
-              <CardTitle>Pagamentos</CardTitle>
+              <CardTitle>Contas a Receber</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Parcelas e pagamentos vinculados a esta venda
+              </p>
             </CardHeader>
             <CardContent>
               {payments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  Nenhum pagamento registrado
+                  Nenhuma conta a receber registrada para esta venda
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Descrição</TableHead>
                       <TableHead>Vencimento</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Método</TableHead>
+                      <TableHead>Taxa</TableHead>
+                      <TableHead>Líquido</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Pagamento</TableHead>
+                      <TableHead>Pago</TableHead>
+                      <TableHead>Restante</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {payments.map((payment) => (
+                    {payments.map((payment: any) => (
                       <TableRow key={payment.id}>
+                        <TableCell>
+                          <div className="font-medium">{payment.description}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {payment.payment_methods?.name}
+                            {payment.card_brands && ` - ${payment.card_brands.name}`}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           {new Date(payment.due_date).toLocaleDateString("pt-BR")}
                         </TableCell>
@@ -395,19 +412,52 @@ const DetalheVenda = () => {
                             currency: "BRL",
                           }).format(Number(payment.amount))}
                         </TableCell>
-                        <TableCell className="capitalize">
-                          {payment.payment_method}
+                        <TableCell>
+                          {payment.fee_amount > 0 ? (
+                            <span className="text-red-500">
+                              -{new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              }).format(Number(payment.fee_amount))}
+                            </span>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(Number(payment.net_amount || payment.amount))}
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={payment.status === "paid" ? "default" : "outline"}
+                            variant={
+                              payment.status === "paid"
+                                ? "default"
+                                : payment.status === "partially_paid"
+                                ? "secondary"
+                                : "outline"
+                            }
                           >
-                            {payment.status === "paid" ? "Pago" : "Pendente"}
+                            {payment.status === "paid"
+                              ? "Pago"
+                              : payment.status === "partially_paid"
+                              ? "Parcial"
+                              : "Pendente"}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {payment.payment_date &&
-                            new Date(payment.payment_date).toLocaleDateString("pt-BR")}
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(Number(payment.paid_amount || 0))}
+                        </TableCell>
+                        <TableCell>
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(Number(payment.remaining_amount || payment.amount))}
                         </TableCell>
                       </TableRow>
                     ))}
