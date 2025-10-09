@@ -21,7 +21,11 @@ import {
   Hammer,
   CheckSquare,
   MessageSquare,
+  Shield,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -124,7 +128,26 @@ const menuItems = [
 
 export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const location = useLocation();
+  const { user } = useAuth();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+
+  // Check if user has super_admin role
+  const { data: isSuperAdmin } = useQuery({
+    queryKey: ["is_super_admin", user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "super_admin")
+        .single();
+
+      return !!data;
+    },
+    enabled: !!user,
+  });
 
   const toggleExpanded = (path: string) => {
     setExpandedItems(prev => 
@@ -166,6 +189,22 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+            {/* Super Admin Link - Only visible to super admins */}
+            {isSuperAdmin && (
+              <Link
+                to="/super-admin"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-fast border-2",
+                  location.pathname === "/super-admin"
+                    ? "bg-primary text-primary-foreground shadow-soft border-primary"
+                    : "text-sidebar-foreground/80 hover:bg-primary/10 hover:text-primary border-primary/50"
+                )}
+              >
+                <Shield className="h-5 w-5 flex-shrink-0" />
+                <span>Super Admin</span>
+              </Link>
+            )}
+            
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
