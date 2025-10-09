@@ -1,5 +1,16 @@
 # Welcome to your Lovable project
 
+## 🚀 Início Rápido - Criar Super Admin
+
+Para criar um usuário com acesso total ao sistema, veja:
+- **[CRIAR_ADMIN.md](CRIAR_ADMIN.md)** - Guia rápido em português (2 minutos)
+- **[docs/CRIAR_SUPER_ADMIN.md](docs/CRIAR_SUPER_ADMIN.md)** - Guia completo
+
+```bash
+# Comando rápido (substitua a chave)
+SUPABASE_SERVICE_ROLE_KEY=sua_chave npm run setup:super-admin
+```
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/84b6734f-4feb-4a2c-9fa5-afe6034f2ab8
