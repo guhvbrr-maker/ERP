@@ -4,6 +4,29 @@ This directory contains helper scripts for managing and applying database migrat
 
 ## Files
 
+### `create-super-admin.cjs`
+A Node.js script that creates a Super Admin user with full system access. This script generates secure credentials and assigns the super_admin role.
+
+**Usage:**
+```bash
+# Create with auto-generated email
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key npm run setup:super-admin
+
+# Create with custom email
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key ADMIN_EMAIL=admin@company.com npm run setup:super-admin
+```
+
+**What it does:**
+1. Creates a new user in Supabase Auth
+2. Generates a secure random password
+3. Assigns the `super_admin` role to the user
+4. Displays the login credentials (email and password)
+
+**Important:**
+- Save the displayed credentials immediately - they won't be shown again
+- The Super Admin has access to ALL data in the system
+- Get your service role key from: https://app.supabase.com/project/htxtlyouzyxmbfbotbvf/settings/api
+
 ### `check-migrations.sql`
 A SQL script that verifies which tables and columns exist in your database. Run this in the Supabase SQL Editor to diagnose missing migrations.
 
