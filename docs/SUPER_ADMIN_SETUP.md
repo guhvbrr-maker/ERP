@@ -40,14 +40,31 @@ WHERE email = 'email@example.com'
 ON CONFLICT (user_id, role) DO NOTHING;
 ```
 
-### Opção 3: Script Automatizado
+### Opção 3: Script Automatizado (Recomendado para novos usuários)
 
-Se você tem acesso ao ambiente de desenvolvimento:
+Se você tem acesso ao ambiente de desenvolvimento, pode criar um novo Super Admin automaticamente:
 
 ```bash
-# Execute o script de configuração
-npm run setup:super-admin
+# Método 1: Usar npm script (email gerado automaticamente)
+SUPABASE_SERVICE_ROLE_KEY=sua_chave npm run setup:super-admin
+
+# Método 2: Especificar email personalizado
+SUPABASE_SERVICE_ROLE_KEY=sua_chave ADMIN_EMAIL=admin@empresa.com npm run setup:super-admin
+
+# Método 3: Executar diretamente
+SUPABASE_SERVICE_ROLE_KEY=sua_chave node scripts/create-super-admin.cjs
 ```
+
+**O que o script faz:**
+- Cria um novo usuário no Supabase Auth
+- Gera uma senha segura automaticamente
+- Atribui a role `super_admin` ao usuário
+- Exibe as credenciais de login (email e senha)
+
+**Importante:**
+- Salve as credenciais exibidas em local seguro
+- A senha é gerada aleatoriamente e só será exibida uma vez
+- Obtenha a service role key em: https://app.supabase.com/project/htxtlyouzyxmbfbotbvf/settings/api
 
 ## Acessando o Painel Super Admin
 
