@@ -37,6 +37,7 @@ import VisualizarCompra from "./pages/compras/VisualizarCompra";
 import Relatorios from "./pages/relatorios/Relatorios";
 import Tarefas from "./pages/tarefas/Tarefas";
 import Chat from "./pages/chat/Chat";
+import SuperAdmin from "./pages/admin/SuperAdmin";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const App = () => (
             <Route path="/tarefas" element={<ProtectedRoute><MainLayout><Tarefas /></MainLayout></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><MainLayout><Chat /></MainLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><MainLayout><Configuracoes /></MainLayout></ProtectedRoute>} />
+            <Route path="/super-admin" element={<ProtectedRoute><MainLayout><SuperAdmin /></MainLayout></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
